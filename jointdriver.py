@@ -1,0 +1,106 @@
+from __future__ import division
+import time
+import Adafruit_PCA9685
+
+# Uncomment to enable debug output.
+#import logging
+#logging.basicConfig(level=logging.DEBUG)
+
+# Initialise the PCA9685 using the default address (0x40).
+pwm = Adafruit_PCA9685.PCA9685()
+# Alternatively specify a different address and/or bus:
+#pwm = Adafruit_PCA9685.PCA9685(address=0x41, busnum=2)
+
+# Configure min and max servo pulse lengths
+servo_min = 150  # Min pulse length out of 4096
+servo_max = 500  # Max pulse length out of 4096
+
+# Helper function to make setting a servo pulse width simpler.
+def set_servo_pulse(channel, pulse):
+    pulse_length = 1000000    # 1,000,000 us per second
+    pulse_length //= 50       # 60 Hz
+    print('{0}us per period'.format(pulse_length))
+    pulse_length //= 4096     # 12 bits of resolution
+    print('{0}us per bit'.format(pulse_length))
+    pulse *= 1000
+    pulse //= pulse_length
+    pwm.set_pwm(channel, 0, pulse)
+
+#get pulse from degree
+def map(x):
+    degree_min = -90
+    degree_max = 90
+    pulse_min = 150
+    pulse_max = 600
+    y = (x - degree_min) * (pulse_max - pulse_min) / (degree_max - degree_min) + pulse_min
+    return int(y)
+
+# Set frequency to 60hz, good for servos.
+pwm.set_pwm_freq(50)
+
+def headScanning(delay):
+    for degree in [-30, 20, 0, -20, 30]:
+        pwm.set_pwm(0, 0, map(degree))
+        for degree2 in [0, -20, 20, -10, 10, 0]:
+            pwm.set_pwm(1, 0, map(degree2))
+            time.sleep(delay)
+			
+    for degree in [-40, 30, -20, 10, 0, 40, -30, 20, -10, 0]:
+        pwm.set_pwm(0, 0, map(degree))
+        time.sleep(delay)
+        pwm.set_pwm(1, 0, map(degree))
+        time.sleep(delay)
+
+#body joint
+HEAD = 0
+NECK = 1
+RIGHT_FRONT_SHOULDER=2
+RIGHT_FRONT_ARM=3
+LEFT_FRONT_SHOULDER=4
+LEFT_FRONT_ARM=5
+RIGHT_BACK_SHOULDER=6
+RIGHT_BACK_ARM=7
+LEFT_BACK_SHOULDER=8
+LEFT_BACK_ARM=9
+
+#moveJoint
+def moveJoint(joint, degree):
+    sign = 1
+    if(joint in [NECK, LEFT_FRONT_ARM, RIGHT_BACK_ARM, RIGHT_FRONT_SHOULDER, RIGHT_BACK_SHOULDER]):
+        sign = -1
+    
+    pwm.set_pwm(joint, 0, map(degree*sign))
+   
+    print("pwm.set_pwm("+str(joint)+", 0, map("+str(degree*sign)+"))")
+
+#zero pos
+def zero(arm_zero_pos=0):
+    moveJoint(HEAD, 0)
+    moveJoint(NECK, 0)
+    moveJoint(RIGHT_FRONT_SHOULDER, 0)
+    moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
+    moveJoint(LEFT_FRONT_SHOULDER, 0)
+    moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
+    moveJoint(RIGHT_BACK_SHOULDER, 0)
+    moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
+    moveJoint(LEFT_BACK_SHOULDER, 0)
+    moveJoint(LEFT_BACK_ARM, arm_zero_pos)
+
+#stendup
+def standup():
+    for degree in [50]:
+        moveJoint(HEAD, 0)
+        moveJoint(NECK, 0)
+        moveJoint(RIGHT_FRONT_SHOULDER, 0)
+        moveJoint(RIGHT_FRONT_ARM, degree)
+        moveJoint(LEFT_FRONT_SHOULDER, 0)
+        moveJoint(LEFT_FRONT_ARM, degree)
+        moveJoint(RIGHT_BACK_SHOULDER, 0)
+        moveJoint(RIGHT_BACK_ARM, degree)
+        moveJoint(LEFT_BACK_SHOULDER, 0)
+        moveJoint(LEFT_BACK_ARM, degree)
+
+#relax motors
+def relax():
+    pwm = Adafruit_PCA9685.PCA9685()
+
