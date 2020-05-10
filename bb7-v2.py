@@ -17,13 +17,13 @@ args = ap.parse_args()
 
 #carica i cascade files di training
 face_cascades = []
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_default.xml'))
-face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_frontalface.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt2.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt_tree.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_profileface.xml'))
-face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_profileface.xml'))
+#face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_default.xml'))
+#face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_frontalface.xml'))
+#face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt.xml'))
+#face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt2.xml'))
+#face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt_tree.xml'))
+#face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_profileface.xml'))
+#face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_profileface.xml'))
 
 #inizializza il count
 count = 1
@@ -33,9 +33,9 @@ colorLower = (29, 86, 6)
 colorUpper = (64, 255, 255)
 
 #inizializza la camera
-camera = picamera.PiCamera()
-camera.resolution = (280, 260)
-camera.start_preview()
+#camera = picamera.PiCamera()
+#camera.resolution = (280, 260)
+#camera.start_preview()
 
 #robot happy
 def happy():
@@ -69,18 +69,18 @@ def captureFrame():
 #trace face
 def traceFace(offset_neck):
     #nuove la testa alla ricerca di un volto
-	for degreeH in [-15, -20, -25, -30, -35]:
-	    for degreeW in [-15, 0, 15, -20, 20]:
-			#aggiorna la posizione della testa (telecamera)
+    for degreeH in [-15, -20, -25, -30, -35]:
+        for degreeW in [-15, 0, 15, -20, 20]:
+            #aggiorna la posizione della testa (telecamera)
             degreeW += offset_neck
-			jd.moveJoint(jd.HEAD, degreeH)
-			jd.moveJoint(jd.NECK, degreeW)
+            jd.moveJoint(jd.HEAD, degreeH)
+            jd.moveJoint(jd.NECK, degreeW)
         
-			for i in range(2):
-				#cattura un frame dalla camera
-				frame = captureFrame(camera)
-				#cerca la faccia all'interno del frame
-				rectangle = faceCapture(frame)
+            for i in range(2):
+                #cattura un frame dalla camera
+                frame = captureFrame(camera)
+                #cerca la faccia all'interno del frame
+                rectangle = faceCapture(frame)
                 
                 if rectangle is not None: 
                     print("found face " % str(rectangle))
@@ -99,41 +99,41 @@ def searchFace():
 
         #annuisce con la testa
         for i in range(5):
-            jd.moveJoint(jd.HEAD, degreeH -10))
+            jd.moveJoint(jd.HEAD, degreeH -10)
             time.sleep(0.4)
-            jd.moveJoint(jd.HEAD, degreeH +10))
+            jd.moveJoint(jd.HEAD, degreeH +10)
             time.sleep(0.4)
-        jd.moveJoint(jd.HEAD, degreeH))	
+        jd.moveJoint(jd.HEAD, degreeH)
 
         #torna il rettangolo trovato
         return rectangle
 
 #search ball
 def searchBall():
-	frame = imutils.resize(frame, width=600)
-	blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-	hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-	mask = cv2.inRange(hsv, colorLower, colorUpper)
-	mask = cv2.erode(mask, None, iterations=2)
-	mask = cv2.dilate(mask, None, iterations=2)
-
+    frame = imutils.resize(frame, width=600)
+    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, colorLower, colorUpper)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
+    
     #trova i contorni
     cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	cnts = imutils.grab_contours(cnts)
-	center = None
-
+    cnts = imutils.grab_contours(cnts)
+    center = None
+    
     #se ha trovato contorni..
-	if len(cnts) > 0:
+    if len(cnts) > 0:
         #ottiene il contorno
-		c = max(cnts, key=cv2.contourArea)
-
+        c = max(cnts, key=cv2.contourArea)
+        
         #ottiene il cerchio ed il centro
-		((x, y), radius) = cv2.minEnclosingCircle(c)
-		M = cv2.moments(c)
-		center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-
-		#se il raggio è maggiore della soglia minima..
-		if radius > 10:
+        ((x, y), radius) = cv2.minEnclosingCircle(c)
+        M = cv2.moments(c)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        
+        #se il raggio e' maggiore della soglia minima..
+        if radius > 10:
             print("ball found {} {} {} {}" % (x, y, radius, str(center)))
 
 #cattura delle facce sul frame corrente
@@ -204,8 +204,7 @@ if(args.command == "steps"):
     time.sleep(1)
     jd.stepTurnRight(2)
     time.sleep(1)
-
-    jd.zero(arm_zero_pos)
+    jd.zero(50)
     time.sleep(2)
     jd.zero()
     time.sleep(0.3)
@@ -223,7 +222,7 @@ if(args.command == "search"):
         bodyPosition = random.choice(["back-left-weight", "front-right-weight", "back-right-weight", "front-left-weight"])
 
         #back-left-weight
-        if(bodyPosition="back-left-weight"):
+        if(bodyPosition=="back-left-weight"):
             jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
             jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
             jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-50)
@@ -231,7 +230,7 @@ if(args.command == "search"):
             offset_neck = 10
 
         #front-right-weight
-        if(bodyPosition="front-right-weight"):
+        if(bodyPosition=="front-right-weight"):
             jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
             jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
             jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
@@ -239,7 +238,7 @@ if(args.command == "search"):
             offset_neck = -10
 
         #back-right-weight
-        if(bodyPosition="back-right-weight"):
+        if(bodyPosition=="back-right-weight"):
             jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
             jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
             jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-70)
@@ -247,7 +246,7 @@ if(args.command == "search"):
             offset_neck = 10
 
         #back-right-weight
-        if(bodyPosition="front-left-weight"):
+        if(bodyPosition=="front-left-weight"):
             jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-50)
             jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-70)
             jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
