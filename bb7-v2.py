@@ -27,13 +27,12 @@ face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_
 face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_profileface.xml'))
 face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_profileface.xml'))
 
-#color thresholds (green)
-#colorLower = (29, 86, 6)
-#colorUpper = (64, 255, 255)
-#colorLower = (0, 142, 245)
-#colorUpper = (70, 255, 255)
-colorLower = np.array([5, 50, 50],np.uint8)
-colorUpper = np.array([15, 255, 255],np.uint8)
+#color thresholds (green & orange)
+greenColorLower = (40, 0, 0)
+greenColorUpper = (130, 255, 255)
+orangeColorLower = (0, 165, 165)
+orangeColorUpper = (150, 255, 255)
+minimum_radius_threshold = 40
 
 #inizializza la camera
 camera = picamera.PiCamera()
@@ -98,48 +97,35 @@ def searchFace():
 #search ball
 def searchBall():
     frame = captureFrame()
-    frame = imutils.resize(frame, width=600)
-    frame = cv2.resize(frame, (640,480))
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    #blurred = cv2.GaussianBlur(frame, (5,5), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, colorLower, colorUpper)
+    mask1 = cv2.inRange(hsv, greenColorLower, greenColorUpper)
+    mask2 = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
+    mask = mask1 | mask2
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     
     #trova i contorni
-    contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)#[-2]
-    contours  = imutils.grab_contours(contours)
+    contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
     
-    '''
+    #scorre i contorni trovati
     for contour in contours:
-        area = cv2.contourArea(contour)
-        (x, y, w, h) = cv2.boundingRect(contour)
-        if  (area < 50 or area > 5000): continue   
-        if  h < w * 1.1 or h > w * 3 or (w*h)>2000 : continue  
-        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)  
-        print("ball found %s %s %s %s" % (x, y, w, h))
-    '''
-    #se ha trovato contorni..
-    if len(contours) > 0:
-        #ottiene il contorno
-        c = max(contours , key=cv2.contourArea)
-        
         #ottiene il cerchio ed il centro
-        ((x, y), radius) = cv2.minEnclosingCircle(c)
-        M = cv2.moments(c)
+        ((x, y), radius) = cv2.minEnclosingCircle(contour)
+        M = cv2.moments(contour)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+        #print("radius %s" % radius)   
         
-        #se il raggio e' maggiore della soglia minima..
-        if radius > 10:
-            print("ball found %s %s %s %s" % (x, y, radius, str(center)))
+        #se il raggio supera la soglia minima
+        if radius > minimum_radius_threshold:
+            print("ball found %s %s" % (radius, str(center)))
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
-
+    
     #salva l'immagine in un file
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'_mask.jpg', mask)
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)        
+    #cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.mask.jpg', mask)
+    #cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)      
 
 
 #cattura delle facce sul frame corrente
