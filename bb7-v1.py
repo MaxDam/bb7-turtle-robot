@@ -94,7 +94,7 @@ if(args.command == "exercise"):
     time.sleep(0.5)
     jd.relax()
 
-#step
+#happy
 if(args.command == "happy"):
     jd.zero()
     time.sleep(2)

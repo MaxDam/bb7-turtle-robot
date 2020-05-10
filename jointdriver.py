@@ -104,3 +104,358 @@ def standup():
 def relax():
     pwm = Adafruit_PCA9685.PCA9685()
 
+#step forward
+def stepForward(stepCount=0, delay=0.1, arm_zero_pos=50):
+    jd.zero(arm_zero_pos)
+    time.sleep(delay)
+    #conta i passi in avanti
+    for i in range(stepCount):
+        #porta il peso indietro a sinistra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba anteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -40)
+        time.sleep(delay)
+        #porta il peso in avanti a destra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-90)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-20)
+        time.sleep(delay)
+        #muove a gamba posteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 0)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -30)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+
+        #porta il peso indietro a destra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-70)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-50)
+        time.sleep(delay)
+        #muove a gamba anteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #porta il peso in avanti a sinistra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba posteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+        time.sleep(delay)
+
+#step back
+def stepBack(stepCount=0, delay=0.1, arm_zero_pos=50):
+    jd.zero(arm_zero_pos)
+    time.sleep(delay)
+    #conta i passi in avanti
+    for i in range(stepCount):
+        #porta il peso in avanti a sinistra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba posteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -40)
+        time.sleep(delay)
+        #porta il peso indietro a destra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-90)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-20)
+        time.sleep(delay)
+        #muove a gamba anteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 0)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -30)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+
+        #porta il peso in avanti a destra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
+        time.sleep(delay)
+        #muove a gamba posteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, -40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #porta il peso indietro a sinistra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba anteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, -40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+        time.sleep(delay)
+
+#step turn left
+def stepTurnLeft(stepCount=0, delay=0.1, arm_zero_pos=50):
+    jd.zero(arm_zero_pos)
+    time.sleep(delay)
+    #conta i passi in avanti
+    for i in range(stepCount):
+        #porta il peso indietro a sinistra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba anteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -40)
+        time.sleep(delay)
+        #porta il peso in avanti a destra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-90)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-20)
+        time.sleep(delay)
+        #muove a gamba posteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 0)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -30)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+
+        #porta il peso indietro a destra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-70)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-50)
+        time.sleep(delay)
+        #muove a gamba anteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, -40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #porta il peso in avanti a sinistra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba posteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+        time.sleep(delay)
+
+#step turn right
+def stepTurnRight(stepCount=0, delay=0.1, arm_zero_pos=50):
+    jd.zero(arm_zero_pos)
+    time.sleep(delay)
+    #conta i passi in avanti
+    for i in range(stepCount):
+        #porta il peso indietro a sinistra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba anteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -40)
+        time.sleep(delay)
+        #porta il peso in avanti a destra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-90)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-20)
+        time.sleep(delay)
+        #muove a gamba posteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 0)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.NECK, -30)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, -40)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 40)
+        jd.moveJoint(jd.NECK, 40)
+        time.sleep(delay)
+
+        #porta il peso indietro a destra
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-70)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-50)
+        time.sleep(delay)
+        #muove a gamba anteriore sinistra per il passo
+        jd.moveJoint(jd.LEFT_FRONT_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #porta il peso in avanti a sinistra
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-50)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-70)
+        time.sleep(delay)
+        #muove a gamba posteriore destra per il passo
+        jd.moveJoint(jd.RIGHT_BACK_ARM, -40)
+        time.sleep(delay)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -40)
+        time.sleep(delay)
+        #reimposta l'assetto gambe
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        time.sleep(delay)
+        #effettua la spinta per il passo
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+        jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 40)
+        jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, -40)
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+        time.sleep(delay)
