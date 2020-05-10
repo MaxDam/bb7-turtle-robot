@@ -102,6 +102,8 @@ def standup():
 
 #relax motors
 def relax():
+    zero()
+    time.sleep(0.1)
     pwm = Adafruit_PCA9685.PCA9685()
 
 #step forward
