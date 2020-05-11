@@ -1,4 +1,5 @@
 import jointdriver as jd
+import detector as dt
 import argparse
 import time
 import random
@@ -17,30 +18,6 @@ ap.add_argument("-cmd", "--command", default=0, help="command")
 
 args = ap.parse_args()
 
-#carica i cascade files di training
-face_cascades = []
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_default.xml'))
-face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_frontalface.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt2.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_frontalface_alt_tree.xml'))
-face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_profileface.xml'))
-face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_profileface.xml'))
-
-#color thresholds (green & orange)
-#greenColorLower = (40, 0, 0)
-#greenColorUpper = (130, 255, 255)
-greenColorLower = (75, 0, 0)
-greenColorUpper = (90, 255, 255)
-orangeColorLower = (0, 165, 165)
-orangeColorUpper = (150, 255, 255)
-minimum_radius_threshold = 40
-
-#inizializza la camera
-camera = picamera.PiCamera()
-camera.resolution = (280, 260)
-camera.start_preview()
-
 #robot happy
 def happy():
     #si abbassa in avanti e guarda in su
@@ -56,130 +33,7 @@ def happy():
         jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -degree)
         jd.moveJoint(jd.LEFT_BACK_SHOULDER, degree)
         time.sleep(0.2)
-
-#prende un frame dalla camera e lo ritorna
-def captureFrame():
-    #crea uno stream in memoria
-    stream = io.BytesIO()
-    #cattura il frame corrente dalla camera e lo inserisce nello stream in memoria
-    camera.capture(stream, format='jpeg')
-    #converte lo stream in memoria in un array numpy
-    image_arr = numpy.fromstring(stream.getvalue(), dtype=numpy.uint8)
-    #crea una immagine opencv dall'array numpy
-    image = cv2.imdecode(image_arr, 1)
-    #torna l'immagine ctturata
-    return image;
-
-#search face
-def searchFace():
-    #cattura un frame dalla camera
-    frame = captureFrame()
-    #cerca la faccia all'interno del frame
-    rectangle = faceCapture(frame)
-
-    #se trova la faccia..
-    if rectangle is not None:        
-        print("found face %s" % (str(rectangle)))
-    else:
-        print("no faces found")
-
-        '''
-        #annuisce con la testa
-        for _ in range(5):
-            jd.moveJoint(jd.HEAD, degreeH -10)
-            time.sleep(0.4)
-            jd.moveJoint(jd.HEAD, degreeH +10)
-            time.sleep(0.4)
-        jd.moveJoint(jd.HEAD, degreeH)
-
-        #torna il rettangolo trovato
-        return rectangle
-        '''
-
-#search ball
-def searchBall():
-    frame = captureFrame()
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
-    hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    mask1 = cv2.inRange(hsv, greenColorLower, greenColorUpper)
-    mask2 = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
-    mask = mask1 | mask2
-    mask = cv2.erode(mask, None, iterations=2)
-    mask = cv2.dilate(mask, None, iterations=2)
     
-    #trova i contorni
-    contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
-    center = None
-    
-    #scorre i contorni trovati
-    for contour in contours:
-        #ottiene il cerchio ed il centro
-        ((x, y), radius) = cv2.minEnclosingCircle(contour)
-        M = cv2.moments(contour)
-        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        #print("radius %s" % radius)   
-        
-        #se il raggio supera la soglia minima
-        if radius > minimum_radius_threshold:
-            print("ball found %s %s" % (radius, str(center)))
-            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
-    
-    #salva l'immagine in un file
-    #cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.mask.jpg', mask)
-    #cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)      
-
-
-#cattura delle facce sul frame corrente
-def faceCapture(frame):    
-    ractangle = None
-    #converte in scala di grigi
-    frameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    #cerca tramite knn(5) delle facce nel frame corrente
-    for face_cascade in face_cascades:
-    	faces = face_cascade.detectMultiScale(frameGray, 1.2, 3)
-    	#faces = face_cascade.detectMultiScale(frameGray, 1.3, 5)
-    	if len(faces) > 0:
-    		break;
-    
-    #messaggio all'utente
-    print("Found " + str(len(faces)) + " face(s)")
-
-    #disegna il rettangolo intorno alla faccia individuata
-    for (x,y,w,h) in faces:
-        ractangle = [x, y, x+w, y+h]
-        cv2.rectangle(frame, (x,y),(x+w,y+h), (255,255,0), 2)
-
-    #salva l'immagine in un file
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)
-
-    return ractangle
-
-#segue la faccia
-def followFace(rect, w, h):
-	while(True):
-			
-		#cattura un frame dalla camera
-		frame = captureFrame()
-
-		#cerca la faccia all'interno del frame
-		rectangle = faceCapture(frame)
-			
-		if rectangle is not None:
-			if(rectangle[0] > rect[0]):
-				pwm.set_pwm(wServo, 0, map(w + 1))
-			if(rectangle[0] > rect[0]):
-				pwm.set_pwm(wServo, 0, map(w - 1))
-			if(rectangle[1] > rect[1]):
-				pwm.set_pwm(hServo, 0, map(h + 1))
-			if(rectangle[1] > rect[1]):
-				pwm.set_pwm(hServo, 0, map(h - 1))
-			rect = rectangle
-	
-		#attende
-		time.sleep(0.05)	
-        
 #posizione iniziale
 if(args.command == "standup"):
     jd.zero(50)
@@ -262,21 +116,72 @@ if(args.command == "search"):
     time.sleep(0.3)
     jd.relax()
 
-#cameratest
-if(args.command == "cameratest"):
+#detectface test
+if(args.command == "detectface"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
     for i in range(20):
         print("step %s" % i)
-        searchFace()
-        #searchBall()
+        detected = dt.detectFace()
+       
+        #stampa il risultato
+        if detected is not None:        
+            print("found face %s" % (str(detected)))
+
+            '''
+            #annuisce con la testa e stoppa il ciclo
+            for _ in range(5):
+                jd.moveJoint(jd.HEAD, degreeH -10)
+                time.sleep(0.4)
+                jd.moveJoint(jd.HEAD, degreeH +10)
+                time.sleep(0.4)
+            jd.moveJoint(jd.HEAD, degreeH)
+            break
+            '''
+        else:
+            print("no faces found")       
+
         time.sleep(0.1)
 
     time.sleep(2)
     jd.zero()
     time.sleep(0.3)
     jd.relax()
+
+#detectball test
+if(args.command == "detectball"):
+    jd.zero(50)
+    jd.moveJoint(jd.HEAD, -20)
+    time.sleep(1)
+    for i in range(20):
+        print("step %s" % i)
+        detected = dt.detectBall()
+
+        #stampa il risultato
+        if detected is not None:        
+            print("found ball %s" % (str(detected)))
+
+            '''
+            #annuisce con la testa e stoppa il ciclo
+            for _ in range(5):
+                jd.moveJoint(jd.HEAD, degreeH -10)
+                time.sleep(0.4)
+                jd.moveJoint(jd.HEAD, degreeH +10)
+                time.sleep(0.4)
+            jd.moveJoint(jd.HEAD, degreeH)
+            break
+            '''
+        else:
+            print("no ball found")       
+
+        time.sleep(0.1)
+
+    time.sleep(2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
 
 #scan head
 if(args.command == "scan"):
