@@ -162,6 +162,15 @@ if(args.command == "detectball"):
         if detected is not None:        
             print("found ball %s" % (str(detected)))
 
+            neckDegree = 0
+            headDegree = 0
+            ballCenter, _ = detected
+            for j in range(10):
+                ballCenter, neckDegree, headDegree = dt.followBall(ballCenter, neckDegree, headDegree)
+                if(ballCenter is None):
+                    print("ball loss")
+                    break;
+
             '''
             #annuisce con la testa e stoppa il ciclo
             for _ in range(5):

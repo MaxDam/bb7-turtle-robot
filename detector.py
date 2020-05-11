@@ -64,7 +64,7 @@ def captureFrame():
     return image;
 
 #detect ball
-def detectBall():
+def detectBall(debug=False):
     detected = None
 
     frame = captureFrame()
@@ -86,27 +86,59 @@ def detectBall():
         ((x, y), radius) = cv2.minEnclosingCircle(contour)
         M = cv2.moments(contour)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        #print("radius %s" % radius)   
+        if(debug): print("radius %s" % radius)   
         
         #se il raggio supera la soglia minima..
         if radius > minimum_radius_threshold:
-            print("ball found %s %s" % (radius, str(center)))
-            cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
+            if(debug): 
+                print("ball found %s %s" % (radius, str(center)))
+                cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
+                cv2.circle(frame, center, 5, (0, 0, 255), -1)
 
             #torna il cerchio trovato
             detected = (center, radius)
             break
     
     #salva l'immagine in un file
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.mask.jpg', mask)
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)     
+    if(debug): 
+        cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.mask.jpg', mask)
+        cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)     
 
     #torna il cerchio trovato
     return detected 
 
+#segue la palla
+def followBall(prevCenter, neckDegree, headDegree, debug=False):
+        
+    MAX_NECK_DEGREE = 40
+    MIN_NECK_DEGREE = -40
+    MAX_HEAD_DEGREE = 40
+    MIN_HEAD_DEGREE = -40
+
+    newCenter = None
+
+    #cerca la palla all'interno del frame
+    detected = detectBall()
+
+    if detected is not None:
+        newCenter, _ = detected
+
+        if(newCenter[0] > prevCenter[0]):
+            neckDegree += (newCenter[0] - prevCenter[0])
+            if(neckDegree > MAX_NECK_DEGREE): neckDegree = MAX_NECK_DEGREE
+            if(neckDegree < MIN_NECK_DEGREE): neckDegree = MIN_NECK_DEGREE
+            jd.moveJoint(jd.NECK, neckDegree)
+
+        if(newCenter[1] > prevCenter[1]):
+            headDegree += (newCenter[1] - prevCenter[1])
+            if(headDegree > MAX_HEAD_DEGREE): headDegree = MAX_HEAD_DEGREE
+            if(headDegree < MIN_HEAD_DEGREE): headDegree = MIN_HEAD_DEGREE
+            jd.moveJoint(jd.HEAD, headDegree)
+
+    return newCenter, neckDegree, headDegree
+
 #detect face
-def detectFace():
+def detectFace(debug=False):
     detected = None
 
     #cattura un frame dalla camera
@@ -125,12 +157,17 @@ def detectFace():
             #se ha trovato qualcosa ottiene il rettangolo riportandolo dopo avere ruotato al contrario le coordinate
             detected = [rotate_point(detected[-1], frameGray, -angle)]
             break
+    
+    if(debug):
+        if detected is not None:
+            print("face found %s" % detected)
 
-    for x, y, w, h in detected[-1:]:
-        cv2.rectangle(img, (x, y), (x+w, y+h), (255,0,0), 2)
-
-    #salva l'immagine in un file
-    cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)
+    if(debug):
+        #visualizza sull'immagine i rettangoli trovati
+        for x, y, w, h in detected[-1:]:
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (255,0,0), 2)
+        #salva l'immagine in un file
+        cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)
 
     #torna il rettangolo trovato
     return detected
