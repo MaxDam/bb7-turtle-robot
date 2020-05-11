@@ -167,9 +167,12 @@ if(args.command == "detectball"):
             ballCenter, _ = detected
             for j in range(10):
                 ballCenter, neckDegree, headDegree = dt.followBall(ballCenter, neckDegree, headDegree)
+                
                 if(ballCenter is None):
-                    print("ball loss")
-                    break;
+                    print("loss ball")
+                    break
+
+                time.sleep(0.1)
 
             '''
             #annuisce con la testa e stoppa il ciclo

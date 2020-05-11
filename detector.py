@@ -86,8 +86,8 @@ def detectBall(debug=False):
         ((x, y), radius) = cv2.minEnclosingCircle(contour)
         M = cv2.moments(contour)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        if(debug): print("radius %s" % radius)   
-        
+        #print("radius %s" % radius)   
+            
         #se il raggio supera la soglia minima..
         if radius > minimum_radius_threshold:
             if(debug): 
