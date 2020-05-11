@@ -17,8 +17,13 @@ greenColorUpper = (90, 255, 255)
 orangeColorLower = (0, 165, 165)
 orangeColorUpper = (150, 255, 255) #(80, 255,255) (130, 255, 255)
 #blu
-blueColorLower = (0, 255, 180)
-blueColorUpper = (255, 255, 255)
+#blueColorLower = (0, 255, 180)
+#blueColorUpper = (255, 255, 255)
+blueColorLower = np.array([110,50,50])
+blueColorUpper = np.array([130,255,255])
+#rosso
+redColorLower = np.array([169, 100, 100])
+redColorUpper = np.array([189, 255, 255])
 
 #infinite loop
 while True:
