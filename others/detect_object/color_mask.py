@@ -29,6 +29,9 @@ def adjustContrastBrightness(image, gamma=1.0):
 
 #initialize capture (video or camera)
 video_capture = cv2.VideoCapture(args.video)
+video_capture.set(3, 320)
+video_capture.set(4, 240)
+
 
 #if we are in predict mode, first at all execute training
 if args.predict:
@@ -47,10 +50,10 @@ while True:
         p.predictParams(True)
 
     #resize the frame
-    image = cv2.resize(frame, (640, 360))
+    #image = cv2.resize(frame, (640, 360))
 
     #apply blur
-    image = cv2.GaussianBlur(image, (11,11), 0)
+    image = cv2.GaussianBlur(frame, (11,11), 0)
 
     #convert frame to the HSV
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)

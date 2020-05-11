@@ -3,14 +3,12 @@ import detector as dt
 import argparse
 import time
 import random
-import io
-import picamera
-import cv2
-import numpy
-import time
-import sys
-import numpy as np
-import imutils
+#import io
+#import picamera
+#import cv2
+#import sys
+#import numpy as np
+#import imutils
 
 #parse the arguments
 ap = argparse.ArgumentParser()
@@ -121,7 +119,34 @@ if(args.command == "detectface"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
-    for i in range(20):
+    for i in range(10):
+        print("step %s" % i)
+        detected = dt.detectFace(debug=True)
+       
+        #stampa il risultato
+        if detected is not None:        
+            print("found face %s" % (str(detected)))
+            
+            #annuisce con la testa e stoppa il ciclo
+            for _ in range(5):
+                jd.moveJoint(jd.HEAD, -10)
+                time.sleep(0.4)
+                jd.moveJoint(jd.HEAD, +10)
+                time.sleep(0.4)
+            jd.moveJoint(jd.HEAD, 0)
+            break
+
+    time.sleep(2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
+#detectface test
+if(args.command == "followface"):
+    jd.zero(50)
+    jd.moveJoint(jd.HEAD, -20)
+    time.sleep(1)
+    for i in range(10):
         print("step %s" % i)
         detected = dt.detectFace()
        
@@ -154,9 +179,85 @@ if(args.command == "detectball"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
-    for i in range(20):
+    for i in range(10):
         print("step %s" % i)
         detected = dt.detectBall()
+
+        #stampa il risultato
+        if detected is not None:        
+            print("found ball %s" % (str(detected)))
+            
+            #annuisce con la testa e stoppa il ciclo
+            for _ in range(5):
+                jd.moveJoint(jd.HEAD, -10)
+                time.sleep(0.4)
+                jd.moveJoint(jd.HEAD, +10)
+                time.sleep(0.4)
+            jd.moveJoint(jd.HEAD, 0)
+            break
+
+    time.sleep(2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
+#test head and detection
+if(args.command == "testhead"):
+    jd.zero(50)
+    '''
+    delay = 0.5
+    jd.moveJoint(jd.HEAD, 20)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, 20)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, -20)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, -20)
+    time.sleep(delay)
+    jd.moveJoint(jd.HEAD, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 20)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 20)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, -20)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 0)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, -20)
+    time.sleep(delay)
+    jd.moveJoint(jd.NECK, 0)
+    '''
+    time.sleep(1)
+    for i in range(20):
+        print("step %s" % i)
+        detected = dt.detectBall(debug=True)
+        if detected is not None:
+            center = detected[0] 
+            print("found ball (%s, %s)" % (center[0], center[1]))
+    time.sleep(2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
+#detectball test
+if(args.command == "followball"):
+    jd.zero(50)
+    jd.moveJoint(jd.HEAD, -20)
+    time.sleep(1)
+    for i in range(20):
+        print("step %s" % i)
+        detected = dt.detectBall(debug=True)
 
         #stampa il risultato
         if detected is not None:        
@@ -165,7 +266,7 @@ if(args.command == "detectball"):
             neckDegree = 0
             headDegree = 0
             ballCenter, _ = detected
-            for j in range(10):
+            for j in range(1000):
                 ballCenter, neckDegree, headDegree = dt.followBall(ballCenter, neckDegree, headDegree)
                 
                 if(ballCenter is None):

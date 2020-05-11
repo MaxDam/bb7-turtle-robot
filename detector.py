@@ -11,22 +11,24 @@ import numpy as np
 #inizializza la camera
 camera = picamera.PiCamera()
 #camera.resolution = (280, 260)
-#camera.resolution = (320, 240)
-camera.resolution = (640, 480)
+camera.resolution = (320, 240)
+#camera.resolution = (640, 480)
 camera.start_preview()
 
 #carica il cascade file
 face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.xml")
 #face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_default.xml")
 
-#color thresholds (green & orange)
-#greenColorLower = (40, 0, 0)
-#greenColorUpper = (130, 255, 255)
+#color thresholds
 greenColorLower = (75, 0, 0)
 greenColorUpper = (90, 255, 255)
-orangeColorLower = (0, 165, 165)
+#orangeColorLower = (0, 165, 165)
+#orangeColorUpper = (150, 255, 255)
+orangeColorLower = (0, 196, 198)
 orangeColorUpper = (150, 255, 255)
-minimum_radius_threshold = 40
+blueColorLower = (0, 255, 180)
+blueColorUpper = (255, 255, 255)
+minimum_radius_threshold = 10
 
 #settaggi del face detection
 faceDetectionSettings = {
@@ -57,7 +59,7 @@ def captureFrame():
     #cattura il frame corrente dalla camera e lo inserisce nello stream in memoria
     camera.capture(stream, format='jpeg')
     #converte lo stream in memoria in un array numpy
-    image_arr = numpy.fromstring(stream.getvalue(), dtype=numpy.uint8)
+    image_arr = np.fromstring(stream.getvalue(), dtype=np.uint8)
     #crea una immagine opencv dall'array numpy
     image = cv2.imdecode(image_arr, 1)
     #torna l'immagine ctturata
@@ -70,9 +72,11 @@ def detectBall(debug=False):
     frame = captureFrame()
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    mask1 = cv2.inRange(hsv, greenColorLower, greenColorUpper)
-    mask2 = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
-    mask = mask1 | mask2
+    maskGreen = cv2.inRange(hsv, greenColorLower, greenColorUpper)
+    maskOrange = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
+    maskBlue = cv2.inRange(hsv, blueColorLower, blueColorUpper)
+    #mask = maskGreen | maskOrange | maskBlue
+    mask = maskOrange
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     
@@ -110,10 +114,11 @@ def detectBall(debug=False):
 #segue la palla
 def followBall(prevCenter, neckDegree, headDegree, debug=False):
         
-    MAX_NECK_DEGREE = 40
-    MIN_NECK_DEGREE = -40
-    MAX_HEAD_DEGREE = 40
-    MIN_HEAD_DEGREE = -40
+    MAX_NECK_DEGREE = 35
+    MIN_NECK_DEGREE = -35
+    MAX_HEAD_DEGREE = 35
+    MIN_HEAD_DEGREE = -35
+    STEP_SIZE = 2
 
     newCenter = None
 
@@ -123,16 +128,33 @@ def followBall(prevCenter, neckDegree, headDegree, debug=False):
     if detected is not None:
         newCenter, _ = detected
 
-        if(newCenter[0] > prevCenter[0]):
-            neckDegree += (newCenter[0] - prevCenter[0])
-            if(neckDegree > MAX_NECK_DEGREE): neckDegree = MAX_NECK_DEGREE
-            if(neckDegree < MIN_NECK_DEGREE): neckDegree = MIN_NECK_DEGREE
+        w, h = camera.resolution
+
+        w_diff = newCenter[0] - w//2
+        h_diff = newCenter[1] - h//2
+
+        if(w_diff > 10):
+            neckDegree += STEP_SIZE
+            print("- collo a destra %s" % (w_diff))
+            neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
+            jd.moveJoint(jd.NECK, neckDegree)
+        
+        if(w_diff < -10):
+            neckDegree -= STEP_SIZE
+            print("- collo a sinstra %s" % (w_diff))
+            neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
             jd.moveJoint(jd.NECK, neckDegree)
 
-        if(newCenter[1] > prevCenter[1]):
-            headDegree += (newCenter[1] - prevCenter[1])
-            if(headDegree > MAX_HEAD_DEGREE): headDegree = MAX_HEAD_DEGREE
-            if(headDegree < MIN_HEAD_DEGREE): headDegree = MIN_HEAD_DEGREE
+        if(h_diff > 10):
+            headDegree += STEP_SIZE
+            print("- testa su %s" % (h_diff))
+            headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
+            jd.moveJoint(jd.HEAD, headDegree)
+
+        if(h_diff < -10):
+            headDegree -= STEP_SIZE
+            print("- testa giu %s" % (h_diff))
+            headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
             jd.moveJoint(jd.HEAD, headDegree)
 
     return newCenter, neckDegree, headDegree
@@ -160,9 +182,7 @@ def detectFace(debug=False):
     
     if(debug):
         if detected is not None:
-            print("face found %s" % detected)
-
-    if(debug):
+            print("face found %s" % str(detected))
         #visualizza sull'immagine i rettangoli trovati
         for x, y, w, h in detected[-1:]:
             cv2.rectangle(frame, (x, y), (x+w, y+h), (255,0,0), 2)
