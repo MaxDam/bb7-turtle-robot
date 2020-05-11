@@ -7,8 +7,10 @@ import numpy as np
 camera = cv2.VideoCapture(0)
 
 #verde
-greenColorLower = (40, 0, 0)
-greenColorUpper = (130, 255, 255) #(80, 255,255) (130, 255, 255)
+#greenColorLower = (40, 0, 0)
+#greenColorUpper = (130, 255, 255) #(80, 255,255) (130, 255, 255)
+greenColorLower = (75, 0, 0)
+greenColorUpper = (90, 255, 255)
 #arancione
 orangeColorLower = (0, 165, 165)
 orangeColorUpper = (150, 255, 255) #(80, 255,255) (130, 255, 255)
@@ -37,7 +39,7 @@ while True:
         M = cv2.moments(contour)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         #print("radius %s" % radius)   
-        if radius > 40:
+        if radius > 20:
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
     

@@ -28,8 +28,10 @@ face_cascades.append(cv2.CascadeClassifier('haarcascade/haarcascade_profileface.
 face_cascades.append(cv2.CascadeClassifier('lbpcascade/lbpcascade_profileface.xml'))
 
 #color thresholds (green & orange)
-greenColorLower = (40, 0, 0)
-greenColorUpper = (130, 255, 255)
+#greenColorLower = (40, 0, 0)
+#greenColorUpper = (130, 255, 255)
+greenColorLower = (75, 0, 0)
+greenColorUpper = (90, 255, 255)
 orangeColorLower = (0, 165, 165)
 orangeColorUpper = (150, 255, 255)
 minimum_radius_threshold = 40
