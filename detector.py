@@ -16,6 +16,9 @@ camera.resolution = (320, 240)
 #camera.resolution = (640, 480)
 camera.start_preview()
 
+#ottiene le coordinate della camera
+cameraW, cameraH = camera.resolution
+        
 #carica il cascade file
 face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.xml")
 #face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_default.xml")
@@ -88,8 +91,7 @@ def detectBall(debug=False):
     mask = cv2.dilate(mask, None, iterations=2)
     
     #print center color
-    if(debug):
-        printRangeCenterColor(frame, 10)
+    printRangeCenterColor(frame, 10)
         
     #trova i contorni
     contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -125,7 +127,7 @@ def detectBall(debug=False):
 
 #stampa il range di colori nella posizione centrale della immagine
 def printRangeCenterColor(frame, interval):
-    minH, minS, minV = math.inf, math.inf, math.inf
+    minH, minS, minV = 255, 255, 255
     maxH, maxS, maxV = 0,0,0
     w, h = 320, 240
     centerX, centerY = w//2, h//2
@@ -147,37 +149,35 @@ def printRangeCenterColor(frame, interval):
 #segue la palla
 def followBall(neckDegree, headDegree, debug=False):
         
-    MAX_NECK_DEGREE = 35
-    MIN_NECK_DEGREE = -35
-    MAX_HEAD_DEGREE = 35
-    MIN_HEAD_DEGREE = -35
-    DEGREE_STEP_SIZE = 2
-    PIXEL_THRESHOLD = 10
+    MAX_NECK_DEGREE = 40
+    MIN_NECK_DEGREE = -40
+    MAX_HEAD_DEGREE = 40
+    MIN_HEAD_DEGREE = -40
+    PIXEL_THRESHOLD = 30
     ballCenter = None
 
     #cerca la palla all'interno del frame, e se la trova..
-    detected = detectBall()
+    detected = detectBall(debug=debug)
     if detected is not None:
         ballCenter, _ = detected
 
-        #ottiene le coordinate della camera
-        cameraW, cameraH = camera.resolution
+        #ottiene le differenze del centro rispetto alle coordinate della camera
         w_diff = ballCenter[0] - cameraW//2
         h_diff = ballCenter[1] - cameraH//2
 
+        #decide di quanto muoversi in base alla distanza dal centro
+        wDegreeStep = 4
+        if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 8
+        elif(abs(w_diff) > cameraW//4):   wDegreeStep = 6
+        hDegreeStep = 4
+        if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 8
+        elif(abs(h_diff) > cameraH//4):   hDegreeStep = 6
+        
         #decide in quale direzione andare
-        if(w_diff > PIXEL_THRESHOLD):
-            neckDegree += DEGREE_STEP_SIZE
-            print("- collo a destra %s" % (w_diff))        
-        if(w_diff < -PIXEL_THRESHOLD):
-            neckDegree -= DEGREE_STEP_SIZE
-            print("- collo a sinstra %s" % (w_diff))
-        if(h_diff > PIXEL_THRESHOLD):
-            headDegree -= DEGREE_STEP_SIZE
-            print("- testa su %s" % (h_diff))
-        if(h_diff < -PIXEL_THRESHOLD):
-            headDegree += DEGREE_STEP_SIZE
-            print("- testa giu %s" % (h_diff))
+        if(w_diff > PIXEL_THRESHOLD):    neckDegree += wDegreeStep
+        elif(w_diff < -PIXEL_THRESHOLD): neckDegree -= wDegreeStep
+        if(h_diff > PIXEL_THRESHOLD):    headDegree += hDegreeStep
+        elif(h_diff < -PIXEL_THRESHOLD): headDegree -= hDegreeStep
 
         #limita entro un range i movimenti
         neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
@@ -233,7 +233,7 @@ def followFace(neckDegree, headDegree, debug=False):
     MIN_HEAD_DEGREE = -35
     DEGREE_STEP_SIZE = 2
     PIXEL_THRESHOLD = 10
-    rect = None
+    faceRect = None
 
     #cerca la faccia all'interno del frame, e se la trova..
     detected = detectFace()
@@ -242,8 +242,7 @@ def followFace(neckDegree, headDegree, debug=False):
         faceCenterX = faceRect[0] + faceRect[2]//2
         faceCenterY = faceRect[1] + faceRect[3]//2
 
-        #ottiene le coordinate della camera
-        cameraW, cameraH = camera.resolution
+        #ottiene differenze con le coordinate della camera
         w_diff = faceCenterX - cameraW//2
         h_diff = faceCenterY - cameraH//2
 
@@ -255,10 +254,10 @@ def followFace(neckDegree, headDegree, debug=False):
             neckDegree -= DEGREE_STEP_SIZE
             print("- collo a sinstra %s" % (w_diff))
         if(h_diff > PIXEL_THRESHOLD):
-            headDegree -= DEGREE_STEP_SIZE
+            headDegree += DEGREE_STEP_SIZE
             print("- testa su %s" % (h_diff))
         if(h_diff < -PIXEL_THRESHOLD):
-            headDegree += DEGREE_STEP_SIZE
+            headDegree -= DEGREE_STEP_SIZE
             print("- testa giu %s" % (h_diff))
 
         #limita entro un range i movimenti

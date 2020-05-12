@@ -167,7 +167,6 @@ if(args.command == "detectface"):
 #follow face
 if(args.command == "followface"):
     jd.zero(50)
-    jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
     for i in range(20):
         print("step %s" % i)
@@ -225,60 +224,16 @@ if(args.command == "detectball"):
     time.sleep(0.3)
     jd.relax()
 
-#test head and detection
-if(args.command == "testhead"):
-    jd.zero(50)
-    '''
-    delay = 0.5
-    jd.moveJoint(jd.HEAD, 20)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, 20)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, -20)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, -20)
-    time.sleep(delay)
-    jd.moveJoint(jd.HEAD, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 20)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 20)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, -20)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 0)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, -20)
-    time.sleep(delay)
-    jd.moveJoint(jd.NECK, 0)
-    '''
-    time.sleep(1)
-    for i in range(20):
-        print("step %s" % i)
-        detected = dt.detectBall(debug=True)
-        if detected is not None:
-            center = detected[0] 
-            print("found ball (%s, %s)" % (center[0], center[1]))
-    time.sleep(2)
-    jd.zero()
-    time.sleep(0.3)
-    jd.relax()
 
 #follow ball
 if(args.command == "followball"):
-    jd.zero(50)
-    jd.moveJoint(jd.HEAD, -20)
+    #detect ball
+    arm_zero_pos = 50
+    
+    jd.zero(arm_zero_pos)
     time.sleep(1)
+
+    count_detected = 0
     for i in range(20):
         print("step %s" % i)
         detected = dt.detectBall()
@@ -286,18 +241,90 @@ if(args.command == "followball"):
         #stampa il risultato
         if detected is not None:        
             print("found ball %s" % (str(detected)))
+            
+            #annuisce con la testa e stoppa il ciclo
+            for _ in range(5):
+                jd.moveJoint(jd.HEAD, -10)
+                time.sleep(0.4)
+                jd.moveJoint(jd.HEAD, +10)
+                time.sleep(0.4)
+            jd.moveJoint(jd.HEAD, 0)
+            count_detected += 1
+    
+        if count_detected >= 2:
+            break;
 
-            neckDegree = 0
-            headDegree = 0
+    #follow ball
+    neckDegree = 3
+    headDegree = -20
+
+    jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
+    jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
+    jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+    jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+    jd.moveJoint(jd.NECK, neckDegree)
+    jd.moveJoint(jd.HEAD, headDegree)
+    time.sleep(0.2)
+    for degree in [50, -50, 50, -50, 50, -50, 50, -50, 0]:
+        jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -degree)
+        jd.moveJoint(jd.LEFT_BACK_SHOULDER, degree)
+        time.sleep(0.2)
+    for i in range(20):
+        print("step %s" % i)
+        detected = dt.detectBall(debug=False)
+
+        #stampa il risultato
+        if detected is not None:        
+            print("found ball %s" % (str(detected)))
+
             ballCenter, _ = detected
-            for _ in range(1000):
-                ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree)
+            loss_count = 0
+            for _ in range(10000):
+                ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree, debug=False)
                 
+                if(headDegree > 30):
+                    jd.moveJoint(jd.HEAD, headDegree-5)
+                    jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+                if(neckDegree > 30) : 
+                    neckDegree -= 30
+                    jd.stepTurnRight(1)
+                    jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+                    jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+                    jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+                    jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)
+                    jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
+                    jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
+                    jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.NECK, neckDegree)
+                    jd.moveJoint(jd.HEAD, headDegree)
+                if(neckDegree < -30): 
+                    neckDegree += 15
+                    jd.stepTurnLeft(1)
+                    jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
+                    jd.moveJoint(jd.LEFT_FRONT_SHOULDER, 0)
+                    jd.moveJoint(jd.RIGHT_BACK_SHOULDER, 0)
+                    jd.moveJoint(jd.LEFT_BACK_SHOULDER, 0)  
+                    jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
+                    jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
+                    jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+                    jd.moveJoint(jd.NECK, neckDegree)
+                    jd.moveJoint(jd.HEAD, headDegree)
+                    
                 if(ballCenter is None):
                     print("loss ball")
-                    break
+                    loss_count += 1
+                else:
+                    loss_count = 0
 
-                time.sleep(0.1)
+                if(loss_count > 20):
+                    break;
+
+                #time.sleep(0.1)    
         else:
             print("no ball found")       
 

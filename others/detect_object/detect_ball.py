@@ -2,7 +2,6 @@ import argparse
 import cv2
 import imutils
 import numpy as np
-import math
 
 #initialize capture (video or camera)
 camera = cv2.VideoCapture(0)
@@ -10,8 +9,8 @@ camera.set(3, 320)
 camera.set(4, 240)
 
 def printRangeCenterColor(frame, interval):
-    minH, minS, minV = math.inf, math.inf, math.inf
-    maxH, maxS, maxV = 0,0,0
+    minH, minS, minV = 255, 255, 255
+    maxH, maxS, maxV = 0, 0, 0
     w, h = 320, 240
     centerX, centerY = w//2, h//2
     for x in range(centerX-interval, centerX+interval):

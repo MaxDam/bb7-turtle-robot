@@ -71,7 +71,8 @@ def moveJoint(joint, degree):
     
     pwm.set_pwm(joint, 0, map(degree*sign))
    
-    print("pwm.set_pwm("+str(joint)+", 0, map("+str(degree*sign)+"))")
+    #debug della posizione
+    #print("pwm.set_pwm("+str(joint)+", 0, map("+str(degree*sign)+"))")
 
 #zero pos
 def zero(arm_zero_pos=0):
@@ -120,13 +121,13 @@ def stepForward(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(RIGHT_FRONT_ARM, -40)
         time.sleep(delay)
         moveJoint(RIGHT_FRONT_SHOULDER, 40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
-        moveJoint(NECK, -40)
+        #moveJoint(NECK, -40)
         time.sleep(delay)
         #porta il peso in avanti a destra
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos-90)
@@ -136,13 +137,13 @@ def stepForward(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_BACK_ARM, -40)
         time.sleep(delay)
         moveJoint(LEFT_BACK_SHOULDER, 40)
-        moveJoint(NECK, 0)
+        #moveJoint(NECK, 0)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
-        moveJoint(NECK, -30)
+        #moveJoint(NECK, -30)
         time.sleep(delay)
         #effettua la spinta per il passo
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
@@ -153,7 +154,7 @@ def stepForward(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_FRONT_SHOULDER, -40)
         moveJoint(LEFT_BACK_SHOULDER, 0)
         moveJoint(RIGHT_BACK_SHOULDER, -40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
 
         #porta il peso indietro a destra
@@ -209,13 +210,13 @@ def stepBack(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(RIGHT_BACK_ARM, -40)
         time.sleep(delay)
         moveJoint(RIGHT_BACK_SHOULDER, -40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
-        moveJoint(NECK, -40)
+        #moveJoint(NECK, -40)
         time.sleep(delay)
         #porta il peso indietro a destra
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos-90)
@@ -225,13 +226,13 @@ def stepBack(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_FRONT_ARM, -40)
         time.sleep(delay)
         moveJoint(LEFT_FRONT_SHOULDER, -40)
-        moveJoint(NECK, 0)
+        #moveJoint(NECK, 0)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
-        moveJoint(NECK, -30)
+        #moveJoint(NECK, -30)
         time.sleep(delay)
         #effettua la spinta per il passo
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
@@ -242,7 +243,7 @@ def stepBack(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_BACK_SHOULDER, 40)
         moveJoint(LEFT_FRONT_SHOULDER, 0)
         moveJoint(RIGHT_FRONT_SHOULDER, 40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
 
         #porta il peso in avanti a destra
@@ -298,13 +299,13 @@ def stepTurnLeft(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(RIGHT_FRONT_ARM, -40)
         time.sleep(delay)
         moveJoint(RIGHT_FRONT_SHOULDER, 40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
-        moveJoint(NECK, -40)
+        #moveJoint(NECK, -40)
         time.sleep(delay)
         #porta il peso in avanti a destra
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos-90)
@@ -314,13 +315,13 @@ def stepTurnLeft(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_BACK_ARM, -40)
         time.sleep(delay)
         moveJoint(LEFT_BACK_SHOULDER, -40)
-        moveJoint(NECK, 0)
+        #moveJoint(NECK, 0)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
-        moveJoint(NECK, -30)
+        #moveJoint(NECK, -30)
         time.sleep(delay)
         #effettua la spinta per il passo
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
@@ -331,7 +332,7 @@ def stepTurnLeft(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_FRONT_SHOULDER, 40)
         moveJoint(LEFT_BACK_SHOULDER, 0)
         moveJoint(RIGHT_BACK_SHOULDER, -40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
 
         #porta il peso indietro a destra
@@ -387,13 +388,13 @@ def stepTurnRight(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(RIGHT_FRONT_ARM, -40)
         time.sleep(delay)
         moveJoint(RIGHT_FRONT_SHOULDER, -40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(RIGHT_BACK_ARM, arm_zero_pos)
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
-        moveJoint(NECK, -40)
+        #moveJoint(NECK, -40)
         time.sleep(delay)
         #porta il peso in avanti a destra
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos-90)
@@ -403,13 +404,13 @@ def stepTurnRight(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_BACK_ARM, -40)
         time.sleep(delay)
         moveJoint(LEFT_BACK_SHOULDER, 40)
-        moveJoint(NECK, 0)
+        #moveJoint(NECK, 0)
         time.sleep(delay)
         #reimposta l'assetto gambe
         moveJoint(LEFT_BACK_ARM, arm_zero_pos)
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
         moveJoint(LEFT_FRONT_ARM, arm_zero_pos)
-        moveJoint(NECK, -30)
+        #moveJoint(NECK, -30)
         time.sleep(delay)
         #effettua la spinta per il passo
         moveJoint(RIGHT_FRONT_ARM, arm_zero_pos)
@@ -420,7 +421,7 @@ def stepTurnRight(stepCount=0, delay=0.1, arm_zero_pos=50):
         moveJoint(LEFT_FRONT_SHOULDER, -40)
         moveJoint(LEFT_BACK_SHOULDER, 0)
         moveJoint(RIGHT_BACK_SHOULDER, 40)
-        moveJoint(NECK, 40)
+        #moveJoint(NECK, 40)
         time.sleep(delay)
 
         #porta il peso indietro a destra
