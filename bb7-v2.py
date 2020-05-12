@@ -40,14 +40,19 @@ if(args.command == "standup"):
 
 #steps
 if(args.command == "steps"):
+    #va avanti
     jd.stepForward(2)
     time.sleep(1)
+    #va indietro
     jd.stepBack(2)
     time.sleep(1)
+    #gira a sinistra
     jd.stepTurnLeft(2)
     time.sleep(1)
+    #gira a destra
     jd.stepTurnRight(2)
     time.sleep(1)
+    #fine
     jd.zero(50)
     time.sleep(2)
     jd.zero()
@@ -60,7 +65,7 @@ if(args.command == "search"):
     jd.zero(arm_zero_pos)
     time.sleep(1)
 
-    for i in range(4):
+    for _ in range(4):
 
         #sceglie la posizione del corpo da assumere in maniera random
         bodyPosition = random.choice(["back-left-weight", "front-right-weight", "back-right-weight", "front-left-weight"])
@@ -105,7 +110,25 @@ if(args.command == "search"):
                 jd.moveJoint(jd.NECK, degreeW)
 
                 #cerca una faccia
-                searchFace()
+                detected = dt.detectFace(debug=True)
+
+                #se trova la faccia la segue
+                if detected is not None:        
+                    print("found face %s" % (str(detected)))
+
+                    neckDegree = 0
+                    headDegree = 0
+                    faceRect = detected[-1:]
+                    for _ in range(1000):
+                        faceRect, neckDegree, headDegree = dt.followFace(neckDegree, headDegree)
+                        
+                        if(faceRect is None):
+                            print("loss face")
+                            break
+
+                        time.sleep(0.1)
+                else:
+                    print("no face found") 
 
     time.sleep(1)
     jd.zero(arm_zero_pos)
@@ -119,7 +142,7 @@ if(args.command == "detectface"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
-    for i in range(10):
+    for i in range(20):
         print("step %s" % i)
         detected = dt.detectFace(debug=True)
        
@@ -141,31 +164,32 @@ if(args.command == "detectface"):
     time.sleep(0.3)
     jd.relax()
 
-#detectface test
+#follow face
 if(args.command == "followface"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
-    for i in range(10):
+    for i in range(20):
         print("step %s" % i)
         detected = dt.detectFace()
-       
+
         #stampa il risultato
         if detected is not None:        
             print("found face %s" % (str(detected)))
 
-            '''
-            #annuisce con la testa e stoppa il ciclo
-            for _ in range(5):
-                jd.moveJoint(jd.HEAD, degreeH -10)
-                time.sleep(0.4)
-                jd.moveJoint(jd.HEAD, degreeH +10)
-                time.sleep(0.4)
-            jd.moveJoint(jd.HEAD, degreeH)
-            break
-            '''
+            neckDegree = 0
+            headDegree = 0
+            faceRect = detected[-1:]
+            for _ in range(1000):
+                faceRect, neckDegree, headDegree = dt.followFace(neckDegree, headDegree)
+                
+                if(faceRect is None):
+                    print("loss face")
+                    break
+
+                time.sleep(0.1)
         else:
-            print("no faces found")       
+            print("no face found")       
 
         time.sleep(0.1)
 
@@ -179,7 +203,7 @@ if(args.command == "detectball"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
-    for i in range(10):
+    for i in range(20):
         print("step %s" % i)
         detected = dt.detectBall()
 
@@ -250,14 +274,14 @@ if(args.command == "testhead"):
     time.sleep(0.3)
     jd.relax()
 
-#detectball test
+#follow ball
 if(args.command == "followball"):
     jd.zero(50)
     jd.moveJoint(jd.HEAD, -20)
     time.sleep(1)
     for i in range(20):
         print("step %s" % i)
-        detected = dt.detectBall(debug=True)
+        detected = dt.detectBall()
 
         #stampa il risultato
         if detected is not None:        
@@ -266,7 +290,7 @@ if(args.command == "followball"):
             neckDegree = 0
             headDegree = 0
             ballCenter, _ = detected
-            for j in range(1000):
+            for _ in range(1000):
                 ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree)
                 
                 if(ballCenter is None):
@@ -274,17 +298,6 @@ if(args.command == "followball"):
                     break
 
                 time.sleep(0.1)
-
-            '''
-            #annuisce con la testa e stoppa il ciclo
-            for _ in range(5):
-                jd.moveJoint(jd.HEAD, degreeH -10)
-                time.sleep(0.4)
-                jd.moveJoint(jd.HEAD, degreeH +10)
-                time.sleep(0.4)
-            jd.moveJoint(jd.HEAD, degreeH)
-            break
-            '''
         else:
             print("no ball found")       
 

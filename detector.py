@@ -153,17 +153,17 @@ def followBall(neckDegree, headDegree, debug=False):
     MIN_HEAD_DEGREE = -35
     DEGREE_STEP_SIZE = 2
     PIXEL_THRESHOLD = 10
-    center = None
+    ballCenter = None
 
     #cerca la palla all'interno del frame, e se la trova..
     detected = detectBall()
     if detected is not None:
-        center, _ = detected
+        ballCenter, _ = detected
 
         #ottiene le coordinate della camera
-        w, h = camera.resolution
-        w_diff = center[0] - w//2
-        h_diff = center[1] - h//2
+        cameraW, cameraH = camera.resolution
+        w_diff = ballCenter[0] - cameraW//2
+        h_diff = ballCenter[1] - cameraH//2
 
         #decide in quale direzione andare
         if(w_diff > PIXEL_THRESHOLD):
@@ -173,10 +173,10 @@ def followBall(neckDegree, headDegree, debug=False):
             neckDegree -= DEGREE_STEP_SIZE
             print("- collo a sinstra %s" % (w_diff))
         if(h_diff > PIXEL_THRESHOLD):
-            headDegree += DEGREE_STEP_SIZE
+            headDegree -= DEGREE_STEP_SIZE
             print("- testa su %s" % (h_diff))
         if(h_diff < -PIXEL_THRESHOLD):
-            headDegree -= DEGREE_STEP_SIZE
+            headDegree += DEGREE_STEP_SIZE
             print("- testa giu %s" % (h_diff))
 
         #limita entro un range i movimenti
@@ -188,7 +188,7 @@ def followBall(neckDegree, headDegree, debug=False):
         jd.moveJoint(jd.HEAD, headDegree)
 
     #torna le nuove coordinate
-    return center, neckDegree, headDegree
+    return ballCenter, neckDegree, headDegree
 
 #detect face
 def detectFace(debug=False):
@@ -225,19 +225,49 @@ def detectFace(debug=False):
 
 
 #segue la faccia
-def followFace(prevRect, w, h):
+def followFace(neckDegree, headDegree, debug=False):
         
-    #cerca la faccia all'interno del frame
-    detected = detectFace()
-        
-    if detected is not None:
-        if(detected[0] > prevRect[0]):
-            jd.moveJoint(jd.HEAD, w + 1)
-        if(detected[0] > prevRect[0]):
-            jd.moveJoint(jd.HEAD, w - 1)
-        if(detected[1] > prevRect[1]):
-            jd.moveJoint(jd.NECK, h + 1)
-        if(detected[1] > prevRect[1]):
-            jd.moveJoint(jd.NECK, h - 1)
+    MAX_NECK_DEGREE = 35
+    MIN_NECK_DEGREE = -35
+    MAX_HEAD_DEGREE = 35
+    MIN_HEAD_DEGREE = -35
+    DEGREE_STEP_SIZE = 2
+    PIXEL_THRESHOLD = 10
+    rect = None
 
-    return detected
+    #cerca la faccia all'interno del frame, e se la trova..
+    detected = detectFace()
+    if detected is not None:
+        faceRect = detected[-1:]
+        faceCenterX = faceRect[0] + faceRect[2]//2
+        faceCenterY = faceRect[1] + faceRect[3]//2
+
+        #ottiene le coordinate della camera
+        cameraW, cameraH = camera.resolution
+        w_diff = faceCenterX - cameraW//2
+        h_diff = faceCenterY - cameraH//2
+
+        #decide in quale direzione andare
+        if(w_diff > PIXEL_THRESHOLD):
+            neckDegree += DEGREE_STEP_SIZE
+            print("- collo a destra %s" % (w_diff))        
+        if(w_diff < -PIXEL_THRESHOLD):
+            neckDegree -= DEGREE_STEP_SIZE
+            print("- collo a sinstra %s" % (w_diff))
+        if(h_diff > PIXEL_THRESHOLD):
+            headDegree -= DEGREE_STEP_SIZE
+            print("- testa su %s" % (h_diff))
+        if(h_diff < -PIXEL_THRESHOLD):
+            headDegree += DEGREE_STEP_SIZE
+            print("- testa giu %s" % (h_diff))
+
+        #limita entro un range i movimenti
+        neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
+        headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
+
+        #muove la testa
+        jd.moveJoint(jd.NECK, neckDegree)
+        jd.moveJoint(jd.HEAD, headDegree)
+
+    #torna le nuove coordinate
+    return faceRect, neckDegree, headDegree
