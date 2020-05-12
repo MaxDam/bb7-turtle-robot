@@ -7,6 +7,7 @@ import random
 import io
 import picamera
 import numpy as np
+import math
 
 #inizializza la camera
 camera = picamera.PiCamera()
@@ -87,9 +88,8 @@ def detectBall(debug=False):
     
     #print center color
     if(debug):
-        w, h = camera.resolution
-        print("center color %s" % frame[w//2, h//2])
-
+        printRangeCenterColor(frame, 10)
+        
     #trova i contorni
     contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
@@ -120,6 +120,26 @@ def detectBall(debug=False):
 
     #torna il cerchio trovato
     return detected 
+
+
+#stampa il range di colori nella posizione centrale della immagine
+def printRangeCenterColor(frame, interval):
+    minH, minS, minV = math.inf, math.inf, math.inf
+    maxH, maxS, maxV = 0,0,0
+    w, h = camera.resolution
+    for x in range(w//2-interval, w//2+interval):
+        for y in range(h//2-interval, h//2+interval):
+            h, s, v = frame[x,y]
+            if h < minH: minH = h
+            if s < minS: minS = s
+            if v < minV: minV =v
+            if h > maxH: maxH = h
+            if s > maxS: maxS = s
+            if v > maxV: maxV = v
+    print("center color range (%s, %s, %s), (%s, %s, %s)" % (minH, minS, minV, maxH, maxS, maxV))
+    cv2.line(frame, (w//2-interval, h//2-interval), (w//2+interval, h//2+interval), (0, 255, 0), thickness=2)
+    return ((minH, minS, minV), (maxH, maxS, maxV))    
+    
 
 #segue la palla
 def followBall(neckDegree, headDegree, debug=False):
