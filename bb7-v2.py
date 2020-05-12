@@ -267,7 +267,7 @@ if(args.command == "followball"):
             headDegree = 0
             ballCenter, _ = detected
             for j in range(1000):
-                ballCenter, neckDegree, headDegree = dt.followBall(ballCenter, neckDegree, headDegree)
+                ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree)
                 
                 if(ballCenter is None):
                     print("loss ball")

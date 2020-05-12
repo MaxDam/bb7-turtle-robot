@@ -20,15 +20,15 @@ face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.x
 #face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_default.xml")
 
 #color thresholds
-greenColorLower = (75, 0, 0)
-greenColorUpper = (90, 255, 255)
-#orangeColorLower = (0, 165, 165)
-#orangeColorUpper = (150, 255, 255)
-orangeColorLower = (0, 196, 198)
-orangeColorUpper = (150, 255, 255)
-blueColorLower = (0, 255, 180)
-blueColorUpper = (255, 255, 255)
-minimum_radius_threshold = 10
+colorThresholds = (
+    ( (13,  0,   255), (20,  255, 255) ), #orangeDay
+    ( (0,   185, 181), (19,  247, 246) ), #orangeNight
+    ( (61,  91,  133), (85,  255, 255) ), #greenDay
+    ( (70,  156, 64),  (87,  255, 255) ), #greenNight
+    ( (97,  115, 136), (121, 250, 255) ), #blueDay
+    ( (107, 153, 127), (123, 255, 242) )  #blueNight
+)
+MIN_RADIUS_THRWSHOLD = 10
 
 #settaggi del face detection
 faceDetectionSettings = {
@@ -72,14 +72,24 @@ def detectBall(debug=False):
     frame = captureFrame()
     blurred = cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    maskGreen = cv2.inRange(hsv, greenColorLower, greenColorUpper)
-    maskOrange = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
-    maskBlue = cv2.inRange(hsv, blueColorLower, blueColorUpper)
-    #mask = maskGreen | maskOrange | maskBlue
-    mask = maskOrange
+    
+    #applica i range di colori
+    mask = None
+    for ct in colorThresholds:
+        minColor, maxColor = ct
+        if mask is None:
+             mask = cv2.inRange(hsv, minColor,  maxColor)
+        else:
+            mask |= cv2.inRange(hsv, minColor,  maxColor)
+
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     
+    #print center color
+    if(debug):
+        w, h = camera.resolution
+        print("center color %s" % frame[w//2, h//2])
+
     #trova i contorni
     contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
@@ -93,7 +103,7 @@ def detectBall(debug=False):
         #print("radius %s" % radius)   
             
         #se il raggio supera la soglia minima..
-        if radius > minimum_radius_threshold:
+        if radius > MIN_RADIUS_THRWSHOLD:
             if(debug): 
                 print("ball found %s %s" % (radius, str(center)))
                 cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
@@ -112,52 +122,50 @@ def detectBall(debug=False):
     return detected 
 
 #segue la palla
-def followBall(prevCenter, neckDegree, headDegree, debug=False):
+def followBall(neckDegree, headDegree, debug=False):
         
     MAX_NECK_DEGREE = 35
     MIN_NECK_DEGREE = -35
     MAX_HEAD_DEGREE = 35
     MIN_HEAD_DEGREE = -35
-    STEP_SIZE = 2
+    DEGREE_STEP_SIZE = 2
+    PIXEL_THRESHOLD = 10
+    center = None
 
-    newCenter = None
-
-    #cerca la palla all'interno del frame
+    #cerca la palla all'interno del frame, e se la trova..
     detected = detectBall()
-
     if detected is not None:
-        newCenter, _ = detected
+        center, _ = detected
 
+        #ottiene le coordinate della camera
         w, h = camera.resolution
+        w_diff = center[0] - w//2
+        h_diff = center[1] - h//2
 
-        w_diff = newCenter[0] - w//2
-        h_diff = newCenter[1] - h//2
-
-        if(w_diff > 10):
-            neckDegree += STEP_SIZE
-            print("- collo a destra %s" % (w_diff))
-            neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
-            jd.moveJoint(jd.NECK, neckDegree)
-        
-        if(w_diff < -10):
-            neckDegree -= STEP_SIZE
+        #decide in quale direzione andare
+        if(w_diff > PIXEL_THRESHOLD):
+            neckDegree += DEGREE_STEP_SIZE
+            print("- collo a destra %s" % (w_diff))        
+        if(w_diff < -PIXEL_THRESHOLD):
+            neckDegree -= DEGREE_STEP_SIZE
             print("- collo a sinstra %s" % (w_diff))
-            neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
-            jd.moveJoint(jd.NECK, neckDegree)
-
-        if(h_diff > 10):
-            headDegree += STEP_SIZE
+        if(h_diff > PIXEL_THRESHOLD):
+            headDegree += DEGREE_STEP_SIZE
             print("- testa su %s" % (h_diff))
-            headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
-            jd.moveJoint(jd.HEAD, headDegree)
-
-        if(h_diff < -10):
-            headDegree -= STEP_SIZE
+        if(h_diff < -PIXEL_THRESHOLD):
+            headDegree -= DEGREE_STEP_SIZE
             print("- testa giu %s" % (h_diff))
-            headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
-            jd.moveJoint(jd.HEAD, headDegree)
 
-    return newCenter, neckDegree, headDegree
+        #limita entro un range i movimenti
+        neckDegree = max( min(neckDegree, MAX_NECK_DEGREE), MIN_NECK_DEGREE )
+        headDegree = max( min(headDegree, MAX_HEAD_DEGREE), MIN_HEAD_DEGREE )
+
+        #muove la testa
+        jd.moveJoint(jd.NECK, neckDegree)
+        jd.moveJoint(jd.HEAD, headDegree)
+
+    #torna le nuove coordinate
+    return center, neckDegree, headDegree
 
 #detect face
 def detectFace(debug=False):
