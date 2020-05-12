@@ -22,7 +22,10 @@ cv2.createTrackbar('SMax', 'image', 0, 255, nothing)
 cv2.createTrackbar('VMax', 'image', 0, 255, nothing)
 
 # Set default value for Max HSV trackbars
-cv2.setTrackbarPos('HMax', 'image', 179)
+cv2.setTrackbarPos('HMin', 'image', 13)
+cv2.setTrackbarPos('SMin', 'image', 130)
+cv2.setTrackbarPos('VMin', 'image', 255)
+cv2.setTrackbarPos('HMax', 'image', 20)
 cv2.setTrackbarPos('SMax', 'image', 255)
 cv2.setTrackbarPos('VMax', 'image', 255)
 
@@ -49,8 +52,11 @@ while True:
     upper = np.array([hMax, sMax, vMax])
 
     # Convert to HSV format and color threshold
+    #image = cv2.GaussianBlur(image, (11, 11), 0)
     hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     mask = cv2.inRange(hsv, lower, upper)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
     result = cv2.bitwise_and(image, image, mask=mask)
 
     # Print if there is a change in HSV value
@@ -64,7 +70,7 @@ while True:
         pvMax = vMax
 
     # Display result image
-    cv2.imshow('oroginal', image)
+    cv2.imshow('original', image)
     cv2.imshow('mask', mask)
     cv2.imshow('image', result)
     if cv2.waitKey(10) & 0xFF == ord('q'):

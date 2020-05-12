@@ -22,7 +22,7 @@ face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.x
 
 #color thresholds
 colorThresholds = (
-    ( (13,  0,   255), (20,  255, 255) ), #orangeDay
+    ( (13,  0,   255), (50,  255, 255) ), #orangeDay
     ( (0,   185, 181), (19,  247, 246) ), #orangeNight
     ( (61,  91,  133), (85,  255, 255) ), #greenDay
     ( (70,  156, 64),  (87,  255, 255) ), #greenNight
@@ -71,17 +71,18 @@ def detectBall(debug=False):
     detected = None
 
     frame = captureFrame()
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    blurred = frame #cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     
     #applica i range di colori
     mask = None
-    for ct in colorThresholds:
-        minColor, maxColor = ct
+    for minColor, maxColor in colorThresholds:
+        minColor = np.asarray(minColor, dtype=np.float32)
+        maxColor = np.asarray(maxColor, dtype=np.float32)
         if mask is None:
-             mask = cv2.inRange(hsv, minColor,  maxColor)
+             mask = cv2.inRange(hsv, minColor, maxColor)
         else:
-            mask |= cv2.inRange(hsv, minColor,  maxColor)
+            mask |= cv2.inRange(hsv, minColor, maxColor)
 
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
@@ -126,9 +127,10 @@ def detectBall(debug=False):
 def printRangeCenterColor(frame, interval):
     minH, minS, minV = math.inf, math.inf, math.inf
     maxH, maxS, maxV = 0,0,0
-    w, h = camera.resolution
-    for x in range(w//2-interval, w//2+interval):
-        for y in range(h//2-interval, h//2+interval):
+    w, h = 320, 240
+    centerX, centerY = w//2, h//2
+    for x in range(centerX-interval, centerX+interval):
+        for y in range(centerY-interval, centerY+interval):
             h, s, v = frame[x,y]
             if h < minH: minH = h
             if s < minS: minS = s
@@ -137,9 +139,10 @@ def printRangeCenterColor(frame, interval):
             if s > maxS: maxS = s
             if v > maxV: maxV = v
     print("center color range (%s, %s, %s), (%s, %s, %s)" % (minH, minS, minV, maxH, maxS, maxV))
-    cv2.line(frame, (w//2-interval, h//2-interval), (w//2+interval, h//2+interval), (0, 255, 0), thickness=2)
+    cv2.line(frame, (centerX-interval, centerY), (centerX+interval, centerY), (0, 255, 0), thickness=2)
+    cv2.line(frame, (centerX, centerY-interval), (centerX, centerY+interval), (0, 255, 0), thickness=2)
     return ((minH, minS, minV), (maxH, maxS, maxV))    
-    
+
 
 #segue la palla
 def followBall(neckDegree, headDegree, debug=False):

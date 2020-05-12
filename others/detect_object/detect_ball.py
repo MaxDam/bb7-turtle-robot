@@ -2,23 +2,41 @@ import argparse
 import cv2
 import imutils
 import numpy as np
+import math
 
 #initialize capture (video or camera)
 camera = cv2.VideoCapture(0)
 camera.set(3, 320)
 camera.set(4, 240)
 
-#verde
-#greenColorLower = (40, 0, 0)
-#greenColorUpper = (130, 255, 255) #(80, 255,255) (130, 255, 255)
-greenColorLower = (75, 0, 0)
-greenColorUpper = (90, 255, 255)
-#arancione
-orangeColorLower = (0, 165, 165)
-orangeColorUpper = (150, 255, 255) #(80, 255,255) (130, 255, 255)
-#blu
-blueColorLower = (0, 255, 180)
-blueColorUpper = (255, 255, 255)
+def printRangeCenterColor(frame, interval):
+    minH, minS, minV = math.inf, math.inf, math.inf
+    maxH, maxS, maxV = 0,0,0
+    w, h = 320, 240
+    centerX, centerY = w//2, h//2
+    for x in range(centerX-interval, centerX+interval):
+        for y in range(centerY-interval, centerY+interval):
+            h, s, v = frame[x,y]
+            if h < minH: minH = h
+            if s < minS: minS = s
+            if v < minV: minV =v
+            if h > maxH: maxH = h
+            if s > maxS: maxS = s
+            if v > maxV: maxV = v
+    print("center color range (%s, %s, %s), (%s, %s, %s)" % (minH, minS, minV, maxH, maxS, maxV))
+    cv2.line(frame, (centerX-interval, centerY), (centerX+interval, centerY), (0, 255, 0), thickness=2)
+    cv2.line(frame, (centerX, centerY-interval), (centerX, centerY+interval), (0, 255, 0), thickness=2)
+    return ((minH, minS, minV), (maxH, maxS, maxV))    
+
+#color thresholds
+colorThresholds = (
+    ( (13,  0,   255), (50,  255, 255) ), #orangeDay
+    ( (0,   185, 181), (19,  247, 246) ), #orangeNight
+    ( (61,  91,  133), (85,  255, 255) ), #greenDay
+    ( (70,  156, 64),  (87,  255, 255) ), #greenNight
+    #( (97,  115, 136), (121, 250, 255) ), #blueDay
+    #( (107, 153, 127), (123, 255, 242) )  #blueNight
+)
 
 #infinite loop
 while True:
@@ -26,13 +44,21 @@ while True:
     ret, frame = camera.read()
     if frame is None: break
 
-    blurred = cv2.GaussianBlur(frame, (11, 11), 0)
+    printRangeCenterColor(frame, 10)
+
+    blurred = frame #cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
-    maskGreen = cv2.inRange(hsv, greenColorLower, greenColorUpper)
-    maskOrange = cv2.inRange(hsv, orangeColorLower, orangeColorUpper)
-    maskBlue = cv2.inRange(hsv, blueColorLower, blueColorUpper)
-    #mask = maskGreen | maskOrange | maskBlue
-    mask = maskBlue
+
+    #applica i range di colori
+    mask = None
+    for minColor, maxColor in colorThresholds:
+        minColor = np.asarray(minColor, dtype=np.float32)
+        maxColor = np.asarray(maxColor, dtype=np.float32)
+        if mask is None:
+             mask = cv2.inRange(hsv, minColor, maxColor)
+        else:
+            mask |= cv2.inRange(hsv, minColor, maxColor)
+    
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
     
