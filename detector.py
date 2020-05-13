@@ -34,12 +34,14 @@ face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.x
 
 #color thresholds
 colorThresholds = (
-    ( (13,  0,   255), (50,  255, 255) ), #orangeDay
-    ( (0,   185, 181), (19,  247, 246) ), #orangeNight
-    ( (61,  91,  133), (85,  255, 255) ), #greenDay
-    ( (70,  156, 64),  (87,  255, 255) ), #greenNight
-    ( (97,  115, 136), (121, 250, 255) ), #blueDay
-    ( (107, 153, 127), (123, 255, 242) )  #blueNight
+    ( (10,  150,   100), (30,  255, 255) ), #orange
+    ( (40,  100,   0), (90,  255, 150) ), #green
+    #( (13,  0,   255), (50,  255, 255) ), #orangeDay
+    #( (0,   185, 181), (19,  247, 246) ), #orangeNight
+    #( (61,  91,  133), (85,  255, 255) ), #greenDay
+    #( (70,  156, 64),  (87,  255, 255) ), #greenNight
+    #( (97,  115, 136), (121, 250, 255) ), #blueDay
+    #( (107, 153, 127), (123, 255, 242) )  #blueNight
 )
 MIN_RADIUS_THRWSHOLD = 10
 
@@ -97,8 +99,8 @@ def detectBall(debug=False):
     #applica i range di colori
     mask = None
     for minColor, maxColor in colorThresholds:
-        minColor = np.asarray(minColor, dtype=np.float32)
-        maxColor = np.asarray(maxColor, dtype=np.float32)
+        #minColor = np.asarray(minColor, dtype=np.float32)
+        #maxColor = np.asarray(maxColor, dtype=np.float32)
         if mask is None:
              mask = cv2.inRange(hsv, minColor, maxColor)
         else:
@@ -122,7 +124,13 @@ def detectBall(debug=False):
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         #print("radius %s" % radius)   
             
-        #se il raggio supera la soglia minima..
+        #cerca la palla con il raggio maggiore
+        maxRadius = MIN_RADIUS_THRWSHOLD
+        maxCenter = (0,0)
+        if radius > maxRadius:
+            maxRadius = radius
+            maxCenter = center
+        '''    
         if radius > MIN_RADIUS_THRWSHOLD:
             if(debug): 
                 print("ball found %s %s" % (radius, str(center)))
@@ -132,7 +140,19 @@ def detectBall(debug=False):
             #torna il cerchio trovato
             detected = (center, radius)
             break
+        '''
     
+    #se ha trovato la palla la ritorna
+    if len(contours) > 0:
+        if(debug): 
+            print("ball found %s %s" % (radius, str(center)))
+            cv2.circle(frame, center, int(maxRadius), (0, 255, 255), 2)
+            cv2.circle(frame, center, 5, (0, 0, 255), -1)
+        
+        #torna il centro ed il raggio della palla individuata
+        detected = (center, radius)
+        break
+
     #salva l'immagine in un file
     if(debug): 
         cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.mask.jpg', mask)

@@ -28,6 +28,7 @@ def printRangeCenterColor(frame, interval):
     return ((minH, minS, minV), (maxH, maxS, maxV))    
 
 #color thresholds
+'''
 colorThresholds = (
     ( (13,  0,   255), (50,  255, 255) ), #orangeDay
     ( (0,   185, 181), (19,  247, 246) ), #orangeNight
@@ -36,6 +37,11 @@ colorThresholds = (
     #( (97,  115, 136), (121, 250, 255) ), #blueDay
     #( (107, 153, 127), (123, 255, 242) )  #blueNight
 )
+'''
+colorThresholds = (
+    ( (10,  150,   100), (30,  255, 255) ),
+    ( (40,  100,   0), (90,  255, 150) ),
+)
 
 #infinite loop
 while True:
@@ -43,7 +49,7 @@ while True:
     ret, frame = camera.read()
     if frame is None: break
 
-    printRangeCenterColor(frame, 10)
+    #printRangeCenterColor(frame, 10)
 
     blurred = frame #cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
@@ -51,8 +57,8 @@ while True:
     #applica i range di colori
     mask = None
     for minColor, maxColor in colorThresholds:
-        minColor = np.asarray(minColor, dtype=np.float32)
-        maxColor = np.asarray(maxColor, dtype=np.float32)
+        #minColor = np.asarray(minColor, dtype=np.float32)
+        #maxColor = np.asarray(maxColor, dtype=np.float32)
         if mask is None:
              mask = cv2.inRange(hsv, minColor, maxColor)
         else:
@@ -65,15 +71,26 @@ while True:
     contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
     center = None
     
-    
+    maxRadius = 8
+    maxCenter = (0,0)
     for contour in contours:
         ((x, y), radius) = cv2.minEnclosingCircle(contour)
         M = cv2.moments(contour)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+
         print("radius %s" % radius)   
+        '''
         if radius > 8:
             cv2.circle(frame, (int(x), int(y)), int(radius), (0, 255, 255), 2)
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
+        '''
+        if radius > maxRadius:
+            maxRadius = radius
+            maxCenter = center
+
+    if len(contours) > 0:
+        cv2.circle(frame, center, int(maxRadius), (0, 255, 255), 2)
+        cv2.circle(frame, center, 5, (0, 0, 255), -1)
     
     #view video to the screen
     cv2.imshow('Mask', mask)
