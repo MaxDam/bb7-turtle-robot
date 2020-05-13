@@ -126,24 +126,32 @@ def detectBall(debug=False):
 
 
 #stampa il range di colori nella posizione centrale della immagine
-def printRangeCenterColor(frame, interval):
-    minH, minS, minV = 255, 255, 255
-    maxH, maxS, maxV = 0,0,0
-    w, h = 320, 240
-    centerX, centerY = w//2, h//2
+#da provare intervallo (hMin,100,100), (hMax,255,255)    
+def printRangeCenterColor(frame, interval=10, minRange=(255,255,255), maxRange=(0,0,0), debug=False):
+    centerX, centerY = cameraW//2, cameraH//2
+    
+    #draw center cross
+    if(debug):
+        cv2.line(frame, (centerX-interval, centerY), (centerX+interval, centerY), (0, 255, 0), thickness=2)
+        cv2.line(frame, (centerX, centerY-interval), (centerX, centerY+interval), (0, 255, 0), thickness=2)
+        
+    #scorre tutti i pixels intorno al centro in base all'intervallo
     for x in range(centerX-interval, centerX+interval):
         for y in range(centerY-interval, centerY+interval):
-            h, s, v = frame[x,y]
-            if h < minH: minH = h
-            if s < minS: minS = s
-            if v < minV: minV =v
-            if h > maxH: maxH = h
-            if s > maxS: maxS = s
-            if v > maxV: maxV = v
-    print("center color range (%s, %s, %s), (%s, %s, %s)" % (minH, minS, minV, maxH, maxS, maxV))
-    cv2.line(frame, (centerX-interval, centerY), (centerX+interval, centerY), (0, 255, 0), thickness=2)
-    cv2.line(frame, (centerX, centerY-interval), (centerX, centerY+interval), (0, 255, 0), thickness=2)
-    return ((minH, minS, minV), (maxH, maxS, maxV))    
+            pixelColor = frame[x,y]            
+            
+            #color conversion rgb to hsv
+            pixelColor = cv2.cvtColor(np.uint8([[[pixelColor[0], pixelColor[1], pixelColor[2]]]]), cv2.COLOR_BGR2HSV)[0][0][0]   
+            
+            #set max e min colors
+            for i in range(3):
+                if pixelColor[i] < minRange[i]: minRange[i] = pixelColor[i]
+                if pixelColor[i] > maxRange[i]: maxRange[i] = pixelColor[i]
+            
+    if(debug): 
+        print("center color range (%s, %s, %s), (%s, %s, %s)" % (minRange[0], minRange[1], minRange[2], maxRange[0], maxRange[1], maxRange[2]))
+    
+    return (minRange, maxRange)    
 
 
 #segue la palla
