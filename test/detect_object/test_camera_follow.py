@@ -7,31 +7,48 @@ import cv2
 import numpy as np
 import jointdriver as jd
 
+#if error: Gtk-WARNING **: cannot open display:
+#export DISPLAY=":0"
+
 # position servos to present object at center of the frame
 def mapServoPosition (x, y):
-    global panAngle
-    global tiltAngle
-    if (x < 220):
-        panAngle += 10
+	global panAngle
+	global tiltAngle
+
+	w_diff = x - 500//2
+	h_diff = y - 250//2
+
+	PIXEL_THRESHOLD = 20
+	if(w_diff > PIXEL_THRESHOLD):    panAngle += 2
+	elif(w_diff < -PIXEL_THRESHOLD): panAngle -= 2
+	if(h_diff > PIXEL_THRESHOLD):    tiltAngle += 2
+	elif(h_diff < -PIXEL_THRESHOLD): tiltAngle -= 2
+	
+	jd.moveJoint(jd.NECK, panAngle)
+	jd.moveJoint(jd.HEAD, tiltAngle)
+'''
+	if (x < 220):
+		panAngle += 10
 		#if panAngle > 140: panAngle = 140
-		if panAngle > 40: panAngle = 40
+		if (panAngle > 40): panAngle = 40
 		jd.moveJoint(jd.NECK, panAngle)
  
-    if (x > 280):
-        panAngle -= 10
-        if panAngle < 40: panAngle = 40
-        jd.moveJoint(jd.NECK, panAngle)
+	if (x > 280):
+		panAngle -= 10
+		if (panAngle < 40): panAngle = 40
+		jd.moveJoint(jd.NECK, panAngle)
 
-    if (y < 160):
-        tiltAngle += 10
-        if tiltAngle > 140: tiltAngle = 140
-		if tiltAngle > 40: tiltAngle = 40
-        jd.moveJoint(jd.HEAD, tiltAngle)
+	if (y < 160):
+		tiltAngle += 10
+		#if tiltAngle > 140: tiltAngle = 140
+		if (tiltAngle > 40): tiltAngle = 40
+		jd.moveJoint(jd.HEAD, tiltAngle)
  
-    if (y > 210):
-        tiltAngle -= 10
-        if tiltAngle < 40: tiltAngle = 40
-        jd.moveJoint(jd.HEAD, tiltAngle)
+	if (y > 210):
+		tiltAngle -= 10
+		if (tiltAngle < 40): tiltAngle = 40
+		jd.moveJoint(jd.HEAD, tiltAngle)
+'''
 
 # initialize the video stream and allow the camera sensor to warmup
 print("[INFO] waiting for camera to warmup...")
@@ -101,7 +118,7 @@ while True:
 	# if [ESC] key is pressed, stop the loop
 	key = cv2.waitKey(1) & 0xFF
 	if key == 27:
-            break
+			break
 
 # do a bit of cleanup
 print("\n [INFO] Exiting Program and cleanup stuff \n")

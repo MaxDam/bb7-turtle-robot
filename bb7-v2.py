@@ -34,7 +34,19 @@ def happy():
     
 #posizione iniziale
 if(args.command == "standup"):
-    jd.zero(50)
+    arm_zero_pos = 50
+    jd.zero(arm_zero_pos)
+    time.sleep(0.5)
+    for _ in range(50):
+        mov = random.choice([0, 15, -15])
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-mov)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos+mov)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-mov)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos+mov)
+        jd.moveJoint(jd.HEAD, random.choice([0, 3, -3, 0, 2, -2]))
+        jd.moveJoint(jd.NECK, random.choice([0, 4, -4, 0, 2, -2]))
+        time.sleep(1)
+    
     time.sleep(4)
     jd.relax()
 
@@ -229,35 +241,43 @@ if(args.command == "detectball"):
 if(args.command == "followball"):
     #detect ball
     arm_zero_pos = 50
-    
     jd.zero(arm_zero_pos)
     time.sleep(1)
 
-    count_detected = 0
+    #cicla 20 volte
     for i in range(20):
         print("step %s" % i)
         detected = dt.detectBall()
-
-        #stampa il risultato
+        
+        #se ha tovato la palla..
         if detected is not None:        
-            print("found ball %s" % (str(detected)))
+            print("found ball %s" % (str(detected)))            
             
-            #annuisce con la testa e stoppa il ciclo
+            #annuisce con la testa ed esce dal ciclo
             for _ in range(5):
                 jd.moveJoint(jd.HEAD, -10)
                 time.sleep(0.4)
                 jd.moveJoint(jd.HEAD, +10)
                 time.sleep(0.4)
             jd.moveJoint(jd.HEAD, 0)
-            count_detected += 1
-    
-        if count_detected >= 2:
-            break;
+            break
+
+        #si muove leggermente in modo random
+        mov = random.choice([0, 15, -15])
+        jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-mov)
+        jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos+mov)
+        jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-mov)
+        jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos+mov)
+        jd.moveJoint(jd.HEAD, random.choice([0, 3, -3, 0, 2, -2]))
+        jd.moveJoint(jd.NECK, random.choice([0, 4, -4, 0, 2, -2]))
+        time.sleep(0.1)
+
 
     #follow ball
     neckDegree = 3
     headDegree = -20
 
+    #si muove come un cane che vuole giocare
     jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-70)
     jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-50)
     jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
@@ -269,26 +289,32 @@ if(args.command == "followball"):
         jd.moveJoint(jd.RIGHT_BACK_SHOULDER, -degree)
         jd.moveJoint(jd.LEFT_BACK_SHOULDER, degree)
         time.sleep(0.2)
+
+    #cicla x 20 volte    
     for i in range(20):
         print("step %s" % i)
         detected = dt.detectBall(debug=False)
 
-        #stampa il risultato
+        #se trova la palla..
         if detected is not None:        
             print("found ball %s" % (str(detected)))
 
+            #cicla per seguire la palla
             ballCenter, _ = detected
             loss_count = 0
             for _ in range(10000):
-                ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree, debug=False)
+                ballCenter, neckDegree, headDegree = dt.followBall(neckDegree, headDegree, debug=True)
                 
+                #se va oltre il range del collo si sposta
                 if(headDegree > 30):
+                    #se va troppo in basso si sposta in alto
                     jd.moveJoint(jd.HEAD, headDegree-5)
                     jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
                     jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
                     jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
                     jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
                 if(neckDegree > 30) : 
+                    #se va troppo a destra si sposta a destra
                     neckDegree -= 30
                     jd.stepTurnRight(1)
                     jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
@@ -302,6 +328,7 @@ if(args.command == "followball"):
                     jd.moveJoint(jd.NECK, neckDegree)
                     jd.moveJoint(jd.HEAD, headDegree)
                 if(neckDegree < -30): 
+                    #se va troppo a sinistra si sposta a sinistra
                     neckDegree += 15
                     jd.stepTurnLeft(1)
                     jd.moveJoint(jd.RIGHT_FRONT_SHOULDER, 0)
@@ -315,12 +342,14 @@ if(args.command == "followball"):
                     jd.moveJoint(jd.NECK, neckDegree)
                     jd.moveJoint(jd.HEAD, headDegree)
                     
+                #se perde la palla incrementa il loss count
                 if(ballCenter is None):
                     print("loss ball")
                     loss_count += 1
                 else:
                     loss_count = 0
 
+                #se ha perso la palla piu' di 20 volte esce dal ciclo
                 if(loss_count > 20):
                     break;
 
@@ -330,6 +359,7 @@ if(args.command == "followball"):
 
         time.sleep(0.1)
 
+    #fine
     time.sleep(2)
     jd.zero()
     time.sleep(0.3)
@@ -344,3 +374,6 @@ if(args.command == "scan"):
 #pulitura
 if(args.command == "relax"):
     jd.relax()
+
+#stop della camera
+dt.stop()

@@ -1,24 +1,33 @@
-
+from __future__ import print_function
+from imutils.video import VideoStream
+import imutils
 import cv2
 from math import sin, cos, radians
 import jointdriver as jd
 import time
 import random
 import io
-import picamera
 import numpy as np
 import math
+import picamera
 
-#inizializza la camera
-camera = picamera.PiCamera()
-#camera.resolution = (280, 260)
-camera.resolution = (320, 240)
-#camera.resolution = (640, 480)
-camera.start_preview()
+INPUT_VIDEO_STREAM = False
 
-#ottiene le coordinate della camera
-cameraW, cameraH = camera.resolution
-        
+if(INPUT_VIDEO_STREAM):
+    #inizializza il video stream
+    cameraW, cameraH = (320, 240)
+    vs = VideoStream(src=0,resolution=(cameraW, cameraH)).start()
+else:
+    #inizializza la camera
+    camera = picamera.PiCamera()
+    #camera.resolution = (280, 260)
+    camera.resolution = (320, 240)
+    #camera.resolution = (640, 480)
+    camera.start_preview()
+
+    #ottiene le coordinate della camera
+    cameraW, cameraH = camera.resolution
+
 #carica il cascade file
 face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.xml")
 #face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_default.xml")
@@ -58,22 +67,30 @@ def rotate_point(pos, img, angle):
 
 #prende un frame dalla camera e lo ritorna
 def captureFrame():
-    #crea uno stream in memoria
-    stream = io.BytesIO()
-    #cattura il frame corrente dalla camera e lo inserisce nello stream in memoria
-    camera.capture(stream, format='jpeg')
-    #converte lo stream in memoria in un array numpy
-    image_arr = np.fromstring(stream.getvalue(), dtype=np.uint8)
-    #crea una immagine opencv dall'array numpy
-    image = cv2.imdecode(image_arr, 1)
-    #torna l'immagine ctturata
-    return image;
+    
+    if(INPUT_VIDEO_STREAM): 
+        frame = vs.read()
+        #frame = imutils.rotate(frame, angle=180)
+        return frame
+    else:
+        #crea uno stream in memoria
+        stream = io.BytesIO()
+        #cattura il frame corrente dalla camera e lo inserisce nello stream in memoria
+        camera.capture(stream, format='jpeg')
+        #converte lo stream in memoria in un array numpy
+        image_arr = np.fromstring(stream.getvalue(), dtype=np.uint8)
+        #crea una immagine opencv dall'array numpy
+        image = cv2.imdecode(image_arr, 1)
+        #torna l'immagine ctturata
+        return image
 
 #detect ball
 def detectBall(debug=False):
     detected = None
 
+    #cattura un frame dalla camera
     frame = captureFrame()
+
     blurred = frame #cv2.GaussianBlur(frame, (11, 11), 0)
     hsv = cv2.cvtColor(blurred, cv2.COLOR_BGR2HSV)
     
@@ -91,7 +108,7 @@ def detectBall(debug=False):
     mask = cv2.dilate(mask, None, iterations=2)
     
     #print center color
-    printRangeCenterColor(frame, 10)
+    #printRangeCenterColor(frame, 10)
         
     #trova i contorni
     contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
@@ -127,7 +144,7 @@ def detectBall(debug=False):
 
 #stampa il range di colori nella posizione centrale della immagine
 #da provare intervallo (hMin,100,100), (hMax,255,255)    
-def printRangeCenterColor(frame, interval=10, minRange=(255,255,255), maxRange=(0,0,0), debug=False):
+def printRangeCenterColor(frame, interval=10, minRange=[255,255,255], maxRange=[0,0,0], debug=False):
     centerX, centerY = cameraW//2, cameraH//2
     
     #draw center cross
@@ -141,15 +158,15 @@ def printRangeCenterColor(frame, interval=10, minRange=(255,255,255), maxRange=(
             pixelColor = frame[x,y]            
             
             #color conversion rgb to hsv
-            pixelColor = cv2.cvtColor(np.uint8([[[pixelColor[0], pixelColor[1], pixelColor[2]]]]), cv2.COLOR_BGR2HSV)[0][0][0]   
+            pixelColor = cv2.cvtColor(np.uint8([[[pixelColor[0], pixelColor[1], pixelColor[2]]]]), cv2.COLOR_BGR2HSV)[0][0]   
             
             #set max e min colors
-            for i in range(3):
+            for i in range(2):
                 if pixelColor[i] < minRange[i]: minRange[i] = pixelColor[i]
                 if pixelColor[i] > maxRange[i]: maxRange[i] = pixelColor[i]
             
-    if(debug): 
-        print("center color range (%s, %s, %s), (%s, %s, %s)" % (minRange[0], minRange[1], minRange[2], maxRange[0], maxRange[1], maxRange[2]))
+    #if(debug): 
+    print("center color range (%s, %s, %s), (%s, %s, %s)" % (minRange[0], minRange[1], minRange[2], maxRange[0], maxRange[1], maxRange[2]))
     
     return (minRange, maxRange)    
 
@@ -164,6 +181,7 @@ def followBall(neckDegree, headDegree, debug=False):
     PIXEL_THRESHOLD = 30
     ballCenter = None
 
+
     #cerca la palla all'interno del frame, e se la trova..
     detected = detectBall(debug=debug)
     if detected is not None:
@@ -174,13 +192,21 @@ def followBall(neckDegree, headDegree, debug=False):
         h_diff = ballCenter[1] - cameraH//2
 
         #decide di quanto muoversi in base alla distanza dal centro
-        wDegreeStep = 4
-        if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 8
-        elif(abs(w_diff) > cameraW//4):   wDegreeStep = 6
-        hDegreeStep = 4
-        if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 8
-        elif(abs(h_diff) > cameraH//4):   hDegreeStep = 6
-        
+        if(INPUT_VIDEO_STREAM): 
+            wDegreeStep = 2
+            if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 6
+            elif(abs(w_diff) > cameraW//4):   wDegreeStep = 4
+            hDegreeStep = 2
+            if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 6
+            elif(abs(h_diff) > cameraH//4):   hDegreeStep = 4
+        else:
+            wDegreeStep = 4
+            if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 8
+            elif(abs(w_diff) > cameraW//4):   wDegreeStep = 6
+            hDegreeStep = 4
+            if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 8
+            elif(abs(h_diff) > cameraH//4):   hDegreeStep = 6
+
         #decide in quale direzione andare
         if(w_diff > PIXEL_THRESHOLD):    neckDegree += wDegreeStep
         elif(w_diff < -PIXEL_THRESHOLD): neckDegree -= wDegreeStep
@@ -204,7 +230,7 @@ def detectFace(debug=False):
 
     #cattura un frame dalla camera
     frame = captureFrame()
-
+    
     #converte in scala di grigi
     frameGray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
@@ -278,3 +304,7 @@ def followFace(neckDegree, headDegree, debug=False):
 
     #torna le nuove coordinate
     return faceRect, neckDegree, headDegree
+
+#stop detector
+def stop():
+    if(INPUT_VIDEO_STREAM): vs.stop()
