@@ -3,12 +3,7 @@ import detector as dt
 import argparse
 import time
 import random
-#import io
-#import picamera
-#import cv2
-#import sys
-#import numpy as np
-#import imutils
+import sensor as ss
 
 #debug mode
 DEBUG = False
@@ -387,6 +382,16 @@ if(args.command == "scan"):
 #pulitura
 if(args.command == "relax"):
     jd.relax()
+
+
+#test gyroscope
+if(args.command == "gyro"):
+for i in range(100):
+    xGyro, yGyro, zGyro = ss.getGyroValues()
+    print("Rotation in X-Axis : %d" %xGyro)
+    print("Rotation in Y-Axis : %d" %yGyro)
+    print("Rotation in Z-Axis : %d" %zGyro)
+    time.sleep(1)
 
 
 #stop della camera
