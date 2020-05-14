@@ -34,8 +34,13 @@ face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.x
 
 #color thresholds
 colorThresholds = (
-    ( (10,  150,   100), (30,  255, 255) ), #orange
-    ( (40,  100,   0), (90,  255, 150) ), #green
+    #calcolati a mano
+    ( (10,  150,   150), (30,  255, 255) ), #orange day
+    ( (40,  100,   150), (90,  255, 255) ), #green day
+    #( (10,  150,   100), (30,  255, 255) ), #orange night
+    #( (40,  100,   0), (90,  255, 150) ), #green night
+    
+    #calcolati con l'applicazione
     #( (13,  0,   255), (50,  255, 255) ), #orangeDay
     #( (0,   185, 181), (19,  247, 246) ), #orangeNight
     #( (61,  91,  133), (85,  255, 255) ), #greenDay
