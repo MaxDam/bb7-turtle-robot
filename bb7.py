@@ -386,12 +386,75 @@ if(args.command == "relax"):
 
 #test gyroscope
 if(args.command == "gyro"):
-    rangeX, rangeY, rangeZ = ss.getGyroRange(100, debug=True)
-    print("------------- TOTAL RANGES-------------")
-    print("Rotation in X-Axis : %d - %d"  % (rangeX[0], rangeX[1]))
-    print("Rotation in Y-Axis : %d - %d"  % (rangeY[0], rangeY[1]))
-    print("Rotation in Z-Axis : %d - %d"  % (rangeZ[0], rangeZ[1]))
-    print("---------------------------------------")
+    arm_zero_pos = 50
+    jd.zero(arm_zero_pos)
+    time.sleep(0.5)
+
+    TILT = 70
+
+    for bodyPosition in ["back-weight", "front-weight", "right-weight", "left-weight", "uniform-weight"]:
+
+        #back-left-weight
+        if(bodyPosition=="back-weight"):
+            jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.NECK, 0)
+            jd.moveJoint(jd.HEAD, 10)
+
+        #front-right-weight
+        if(bodyPosition=="front-weight"):
+            jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.NECK, 0)
+            jd.moveJoint(jd.HEAD, -10)
+
+        #right-weight
+        if(bodyPosition=="right-weight"):
+            jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos-70)
+            jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.NECK, -10)
+            jd.moveJoint(jd.HEAD, 0)
+
+        #left-weight
+        if(bodyPosition=="left-weight"):
+            jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos-TILT)
+            jd.moveJoint(jd.NECK, 10)
+            jd.moveJoint(jd.HEAD, 0)
+
+        #uniform-weight
+        if(bodyPosition=="uniform-weight"):
+            jd.moveJoint(jd.RIGHT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_FRONT_ARM, arm_zero_pos)
+            jd.moveJoint(jd.RIGHT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.LEFT_BACK_ARM, arm_zero_pos)
+            jd.moveJoint(jd.NECK, 0)
+            jd.moveJoint(jd.HEAD, 0)
+
+        rangeX, rangeY, rangeZ = ss.getGyroRange(5, debug=True)
+        print("----------- TOTAL RANGES %s -----------" % bodyPosition)
+        print("Rotation in X-Axis : %d - %d"  % (rangeX[0], rangeX[1]))
+        print("Rotation in Y-Axis : %d - %d"  % (rangeY[0], rangeY[1]))
+        print("Rotation in Z-Axis : %d - %d"  % (rangeZ[0], rangeZ[1]))
+        print("------------------------------------------")
+
+        time.sleep(0.5)
+
+    #fine
+    jd.zero(50)
+    time.sleep(2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
 
 #stop della camera
 dt.stop()

@@ -31,8 +31,7 @@ while(True):
 
     # Convert the data
     xGyro = data1 * 256 + data0
-    if xGyro > 32767 :
-	xGyro -= 65536
+    if xGyro > 32767 : xGyro -= 65536
 
     # L3G4200D address, 0x68(104)
     # Read data back from 0x2A(42), 2 bytes, Y-Axis LSB first
@@ -41,8 +40,7 @@ while(True):
 
     # Convert the data
     yGyro = data1 * 256 + data0
-    if yGyro > 32767 :
-	yGyro -= 65536
+    if yGyro > 32767 : yGyro -= 65536
 
     # L3G4200D address, 0x68(104)
     # Read data back from 0x2C(44), 2 bytes, Z-Axis LSB first
@@ -51,8 +49,7 @@ while(True):
 
     # Convert the data
     zGyro = data1 * 256 + data0
-    if zGyro > 32767 :
-	zGyro -= 65536
+    if zGyro > 32767 : zGyro -= 65536
 
     # Output data to screen
     print("Rotation in X-Axis : %d" %xGyro)

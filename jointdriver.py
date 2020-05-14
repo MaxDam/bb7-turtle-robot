@@ -1,8 +1,9 @@
 #https://github.com/adafruit/Adafruit_Python_PCA9685
+#sudo pip install adafruit-pca9685
 
 from __future__ import division
 import time
-import Adafruit_PCA9685
+import Adafruit_PCA9685.PCA9685
 
 # Uncomment to enable debug output.
 #import logging

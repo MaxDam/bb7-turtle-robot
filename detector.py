@@ -197,7 +197,7 @@ def printRangeCenterColor(frame, interval=10, minRange=[255,255,255], maxRange=[
             pixelColor = cv2.cvtColor(np.uint8([[[pixelColor[0], pixelColor[1], pixelColor[2]]]]), cv2.COLOR_BGR2HSV)[0][0]   
             
             #set max e min colors
-            for i in range(2):
+            for i in range(3):
                 if pixelColor[i] < minRange[i]: minRange[i] = pixelColor[i]
                 if pixelColor[i] > maxRange[i]: maxRange[i] = pixelColor[i]
             

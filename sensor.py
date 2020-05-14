@@ -62,7 +62,7 @@ def getGyroRange(cycles=10, debug=False):
 
     for _ in range(cycles):
         value = getGyroValues()        
-        for i in range(2):
+        for i in range(3):
             if value[i] < valueMin[i]: valueMin[i] = value[i]
             if value[i] > valueMax[i]: valueMax[i] = value[i]
 
