@@ -386,13 +386,12 @@ if(args.command == "relax"):
 
 #test gyroscope
 if(args.command == "gyro"):
-for i in range(100):
-    xGyro, yGyro, zGyro = ss.getGyroValues()
-    print("Rotation in X-Axis : %d" %xGyro)
-    print("Rotation in Y-Axis : %d" %yGyro)
-    print("Rotation in Z-Axis : %d" %zGyro)
-    time.sleep(1)
-
+    rangeX, rangeY, rangeZ = ss.getGyroRange(100, debug=True)
+    print("------------- TOTAL RANGES-------------")
+    print("Rotation in X-Axis : %d - %d"  % (rangeX[0], rangeX[1]))
+    print("Rotation in Y-Axis : %d - %d"  % (rangeY[0], rangeY[1]))
+    print("Rotation in Z-Axis : %d - %d"  % (rangeZ[0], rangeZ[1]))
+    print("---------------------------------------")
 
 #stop della camera
 dt.stop()
