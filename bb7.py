@@ -456,5 +456,20 @@ if(args.command == "gyro"):
     jd.relax()
 
 
+#register
+if(args.command == "acquire"):
+    jd.zero(50)
+    jd.moveJoint(jd.HEAD, 0)
+    jd.moveJoint(jd.NECK, 0)
+    time.sleep(1)
+    
+    dt.registerVideo()
+
+    time.sleep(0.2)
+    jd.zero()
+    time.sleep(0.3)
+    jd.relax()
+
+
 #stop della camera
 dt.stop()

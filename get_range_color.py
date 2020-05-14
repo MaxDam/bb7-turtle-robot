@@ -1,0 +1,82 @@
+import cv2
+import numpy as np
+
+#initialize capture (video or camera)
+videoPath = 'frames/output.avi'
+#video_capture = cv2.VideoCapture(0)
+video_capture = cv2.VideoCapture(videoPath)
+video_capture.set(3, 320)
+video_capture.set(4, 240)
+
+def nothing(x):
+    pass
+
+# Create a window
+cv2.namedWindow('image')
+
+# Create trackbars for color change
+# Hue is from 0-179 for Opencv
+cv2.createTrackbar('HMin', 'image', 0, 179, nothing)
+cv2.createTrackbar('SMin', 'image', 0, 255, nothing)
+cv2.createTrackbar('VMin', 'image', 0, 255, nothing)
+cv2.createTrackbar('HMax', 'image', 0, 179, nothing)
+cv2.createTrackbar('SMax', 'image', 0, 255, nothing)
+cv2.createTrackbar('VMax', 'image', 0, 255, nothing)
+
+# Set default value for Max HSV trackbars
+cv2.setTrackbarPos('HMin', 'image', 13)
+cv2.setTrackbarPos('SMin', 'image', 130)
+cv2.setTrackbarPos('VMin', 'image', 255)
+cv2.setTrackbarPos('HMax', 'image', 20)
+cv2.setTrackbarPos('SMax', 'image', 255)
+cv2.setTrackbarPos('VMax', 'image', 255)
+
+# Initialize HSV min/max values
+hMin = sMin = vMin = hMax = sMax = vMax = 0
+phMin = psMin = pvMin = phMax = psMax = pvMax = 0
+
+#infinite loop
+while True:
+
+    #Capture frame-by-frame and set input
+    ret, image = video_capture.read()
+
+    # Get current positions of all trackbars
+    hMin = cv2.getTrackbarPos('HMin', 'image')
+    sMin = cv2.getTrackbarPos('SMin', 'image')
+    vMin = cv2.getTrackbarPos('VMin', 'image')
+    hMax = cv2.getTrackbarPos('HMax', 'image')
+    sMax = cv2.getTrackbarPos('SMax', 'image')
+    vMax = cv2.getTrackbarPos('VMax', 'image')
+
+    # Set minimum and maximum HSV values to display
+    lower = np.array([hMin, sMin, vMin])
+    upper = np.array([hMax, sMax, vMax])
+    print("Color range: (%s, %s, %s) - (%s, %s, %s)" % (lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]))
+
+    # Convert to HSV format and color threshold
+    #image = cv2.GaussianBlur(image, (11, 11), 0)
+    hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mask = cv2.inRange(hsv, lower, upper)
+    mask = cv2.erode(mask, None, iterations=2)
+    mask = cv2.dilate(mask, None, iterations=2)
+    result = cv2.bitwise_and(image, image, mask=mask)
+
+    # Print if there is a change in HSV value
+    if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax) ):
+        print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin , sMin , vMin, hMax, sMax , vMax))
+        phMin = hMin
+        psMin = sMin
+        pvMin = vMin
+        phMax = hMax
+        psMax = sMax
+        pvMax = vMax
+
+    # Display result image
+    cv2.imshow('original', image)
+    cv2.imshow('mask', mask)
+    cv2.imshow('image', result)
+    if cv2.waitKey(10) & 0xFF == ord('q'):
+        break
+
+cv2.destroyAllWindows()

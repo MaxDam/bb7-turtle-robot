@@ -338,6 +338,17 @@ def followFace(neckDegree, headDegree, debug=False):
     #torna le nuove coordinate
     return faceRect, neckDegree, headDegree
 
+#register videos
+def registerVideo(outputPath='frames/output.avi', seconds=10):
+    out = cv2.VideoWriter(outputPath, cv2.VideoWriter_fourcc('M','J','P','G'), 10, (cameraW, cameraH))
+    nowTime = float("inf")
+    startTime = time.time()
+    while(endTime < seconds*60):
+        endTime = time.time() - startTime
+        frame = captureFrame()
+        out.write(frame)
+    out.release()
+
 #stop detector
 def stop():
     if(INPUT_VIDEO_STREAM): vs.stop()
