@@ -1,3 +1,16 @@
+#dipendenze:
+#sudo apt-get update
+#sudo apt-get install python-picamera python3-picamera
+#pip install imutils 
+
+#start camera:
+#sudo service motion stop
+#sudo modprobe bcm2835-v4l2
+
+#start stream video:
+#if error: Gtk-WARNING **: cannot open display
+#export DISPLAY=":0"
+
 from __future__ import print_function
 from imutils.video import VideoStream
 import imutils
