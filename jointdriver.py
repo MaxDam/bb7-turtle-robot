@@ -8,7 +8,9 @@ import Adafruit_PCA9685
 #import logging
 #logging.basicConfig(level=logging.DEBUG)
 
-# Initialise the PCA9685 using the default address (0x40).
+#for i2c list use:
+#i2cdetect -y 1 
+#Initialise the PCA9685 using the default address (0x40).
 pwm = Adafruit_PCA9685.PCA9685()
 # Alternatively specify a different address and/or bus:
 #pwm = Adafruit_PCA9685.PCA9685(address=0x41, busnum=2)

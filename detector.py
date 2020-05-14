@@ -24,8 +24,7 @@ import numpy as np
 import math
 import picamera
 
-INPUT_VIDEO_STREAM = False
-
+INPUT_VIDEO_STREAM = True
 if(INPUT_VIDEO_STREAM):
     #inizializza il video stream
     cameraW, cameraH = (320, 240)
@@ -168,8 +167,7 @@ def detectBall(debug=False):
             cv2.circle(frame, center, 5, (0, 0, 255), -1)
         
         #torna il centro ed il raggio della palla individuata
-        detected = (center, radius)
-        break
+        detected = (maxCenter, maxRadius)
 
     #salva l'immagine in un file
     if(debug): 
@@ -212,14 +210,19 @@ def printRangeCenterColor(frame, interval=10, minRange=[255,255,255], maxRange=[
 #segue la palla
 def followBall(neckDegree, headDegree, debug=False):
         
+    #gradi limite del collo
     MAX_NECK_DEGREE = 40
     MIN_NECK_DEGREE = -40
     MAX_HEAD_DEGREE = 40
     MIN_HEAD_DEGREE = -40
-    PIXEL_THRESHOLD = 30
     ballCenter = None
 
-
+    #pixel di soglia e step in base alla distanza dal centro
+    PIXEL_THRESHOLD = 30
+    L_DEGREE_STEP = 4
+    M_DEGREE_STEP = 6
+    H_DEGREE_STEP = 8
+    
     #cerca la palla all'interno del frame, e se la trova..
     detected = detectBall(debug=debug)
     if detected is not None:
@@ -230,20 +233,12 @@ def followBall(neckDegree, headDegree, debug=False):
         h_diff = ballCenter[1] - cameraH//2
 
         #decide di quanto muoversi in base alla distanza dal centro
-        if(INPUT_VIDEO_STREAM): 
-            wDegreeStep = 2
-            if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 6
-            elif(abs(w_diff) > cameraW//4):   wDegreeStep = 4
-            hDegreeStep = 2
-            if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 6
-            elif(abs(h_diff) > cameraH//4):   hDegreeStep = 4
-        else:
-            wDegreeStep = 4
-            if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = 8
-            elif(abs(w_diff) > cameraW//4):   wDegreeStep = 6
-            hDegreeStep = 4
-            if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = 8
-            elif(abs(h_diff) > cameraH//4):   hDegreeStep = 6
+        wDegreeStep = L_DEGREE_STEP
+        if(abs(w_diff) > (cameraW//8)*3): wDegreeStep = H_DEGREE_STEP
+        elif(abs(w_diff) > cameraW//4):   wDegreeStep = M_DEGREE_STEP
+        hDegreeStep = L_DEGREE_STEP
+        if(abs(h_diff) > (cameraH//8)*3): hDegreeStep = H_DEGREE_STEP
+        elif(abs(h_diff) > cameraH//4):   hDegreeStep = M_DEGREE_STEP
 
         #decide in quale direzione andare
         if(w_diff > PIXEL_THRESHOLD):    neckDegree += wDegreeStep

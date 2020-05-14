@@ -168,14 +168,14 @@ if(args.command == "detectface"):
         if detected is not None:        
             print("found face %s" % (str(detected)))
             
-            #annuisce con la testa e stoppa il ciclo
+            #annuisce con la testa
             for _ in range(5):
                 jd.moveJoint(jd.HEAD, -10)
                 time.sleep(0.4)
                 jd.moveJoint(jd.HEAD, +10)
                 time.sleep(0.4)
             jd.moveJoint(jd.HEAD, 0)
-            break
+            #break
 
     time.sleep(2)
     jd.zero()
@@ -224,20 +224,20 @@ if(args.command == "detectball"):
     time.sleep(1)
     for i in range(20):
         print("step %s" % i)
-        detected = dt.detectBall()
+        detected = dt.detectBall(debug=True)
 
         #stampa il risultato
         if detected is not None:        
             print("found ball %s" % (str(detected)))
             
-            #annuisce con la testa e stoppa il ciclo
+            #annuisce con la testa se trova la palla
             for _ in range(5):
                 jd.moveJoint(jd.HEAD, -10)
                 time.sleep(0.4)
                 jd.moveJoint(jd.HEAD, +10)
                 time.sleep(0.4)
             jd.moveJoint(jd.HEAD, 0)
-            break
+            #break
 
     time.sleep(2)
     jd.zero()
