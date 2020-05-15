@@ -47,8 +47,10 @@ face_cascade = cv2.CascadeClassifier("haarcascade/haarcascade_frontalface_alt2.x
 #color thresholds
 colorThresholds = (
     #calcolati a mano
-    ( (10,  150,   150), (30,  255, 255) ), #orange day
-    ( (40,  100,   150), (90,  255, 255) ), #green day
+    ((60, 242, 36), (97, 255, 255)), #green
+    #((16, 197, 0), (47, 255, 255)) #orange
+    #( (10,  150,   150), (30,  255, 255) ), #orange day
+    #( (40,  100,   150), (90,  255, 255) ), #green day
     #( (10,  150,   100), (30,  255, 255) ), #orange night
     #( (40,  100,   0), (90,  255, 150) ), #green night
     
@@ -219,9 +221,12 @@ def followBall(neckDegree, headDegree, debug=False):
 
     #pixel di soglia e step in base alla distanza dal centro
     PIXEL_THRESHOLD = 30
-    L_DEGREE_STEP = 4
-    M_DEGREE_STEP = 6
-    H_DEGREE_STEP = 8
+    #L_DEGREE_STEP = 4
+    #M_DEGREE_STEP = 6
+    #H_DEGREE_STEP = 8
+    L_DEGREE_STEP = 2
+    M_DEGREE_STEP = 4
+    H_DEGREE_STEP = 6
     
     #cerca la palla all'interno del frame, e se la trova..
     detected = detectBall(debug=debug)
@@ -338,16 +343,14 @@ def followFace(neckDegree, headDegree, debug=False):
     #torna le nuove coordinate
     return faceRect, neckDegree, headDegree
 
-#register videos
-def registerVideo(outputPath='frames/output.avi', seconds=10):
-    out = cv2.VideoWriter(outputPath, cv2.VideoWriter_fourcc('M','J','P','G'), 10, (cameraW, cameraH))
-    nowTime = float("inf")
+#register images from cam
+def registerImages(outputPath='frames/output.avi', seconds=60):
+    diffTime = 0
     startTime = time.time()
-    while(endTime < seconds*60):
-        endTime = time.time() - startTime
+    while(diffTime < seconds):
+        diffTime = time.time() - startTime
         frame = captureFrame()
-        out.write(frame)
-    out.release()
+        cv2.imwrite('frames/'+time.strftime("%Y%m%d-%H%M%S")+'.jpg', frame)   
 
 #stop detector
 def stop():

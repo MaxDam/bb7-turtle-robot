@@ -1,12 +1,7 @@
 import cv2
 import numpy as np
-
-#initialize capture (video or camera)
-videoPath = 'frames/output.avi'
-#video_capture = cv2.VideoCapture(0)
-video_capture = cv2.VideoCapture(videoPath)
-video_capture.set(3, 320)
-video_capture.set(4, 240)
+import glob
+import time
 
 def nothing(x):
     pass
@@ -35,11 +30,17 @@ cv2.setTrackbarPos('VMax', 'image', 255)
 hMin = sMin = vMin = hMax = sMax = vMax = 0
 phMin = psMin = pvMin = phMax = psMax = pvMax = 0
 
+#import images
+filenames = [img for img in glob.glob("frames/*.jpg")]
+
 #infinite loop
+index = 0
 while True:
 
-    #Capture frame-by-frame and set input
-    ret, image = video_capture.read()
+    #Capture image
+    image = cv2.imread(filenames[index], 1)
+    index += 1
+    if index >= len(filenames): index = 0
 
     # Get current positions of all trackbars
     hMin = cv2.getTrackbarPos('HMin', 'image')
@@ -52,7 +53,6 @@ while True:
     # Set minimum and maximum HSV values to display
     lower = np.array([hMin, sMin, vMin])
     upper = np.array([hMax, sMax, vMax])
-    print("Color range: (%s, %s, %s) - (%s, %s, %s)" % (lower[0], lower[1], lower[2], upper[0], upper[1], upper[2]))
 
     # Convert to HSV format and color threshold
     #image = cv2.GaussianBlur(image, (11, 11), 0)
@@ -64,7 +64,7 @@ while True:
 
     # Print if there is a change in HSV value
     if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax) ):
-        print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin , sMin , vMin, hMax, sMax , vMax))
+        print("((%d, %d, %d), (%d, %d, %d))" % (hMin , sMin , vMin, hMax, sMax , vMax))
         phMin = hMin
         psMin = sMin
         pvMin = vMin
@@ -76,7 +76,11 @@ while True:
     cv2.imshow('original', image)
     cv2.imshow('mask', mask)
     cv2.imshow('image', result)
-    if cv2.waitKey(10) & 0xFF == ord('q'):
+
+    k = cv2.waitKey(1)
+    if(k==ord("q")): 
         break
+    
+    time.sleep(0.3)
 
 cv2.destroyAllWindows()

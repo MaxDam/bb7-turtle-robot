@@ -463,7 +463,7 @@ if(args.command == "acquire"):
     jd.moveJoint(jd.NECK, 0)
     time.sleep(1)
     
-    dt.registerVideo()
+    dt.registerImages(seconds=10)
 
     time.sleep(0.2)
     jd.zero()

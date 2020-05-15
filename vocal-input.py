@@ -1,5 +1,5 @@
-#pip install SpeechRecognition 
-#pip install PyAudio
+#pip3 install SpeechRecognition 
+#pip3 install PyAudio
 
 import speech_recognition as sr
 import os
