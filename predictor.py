@@ -8,7 +8,8 @@
 
 import numpy as np
 import cv2
-import csv
+#import csv
+import os
 
 from sklearn import preprocessing
 from sklearn.ensemble import RandomForestRegressor
@@ -57,7 +58,7 @@ def getData(self):
     return X, Y
 
 #append data to csv
-def writeDataToCsv(name, X, Y):
+def writeDataRowToCsv(name, X, Y):
     #csvFileName = "train/" +name + ".csv"
     #with open(csvFileName, mode='a', newline='') as csvFile:
     #    writer = csv.writer(csvFile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -65,32 +66,36 @@ def writeDataToCsv(name, X, Y):
 
     csvFileName = "train/" +name + ".csv"
     with open(csvFileName, mode='a', newline='') as csvFile:
-        data = np.hstack([X, Y])
-        csvFile.write(",".join(row.astype(str)))
+        row = np.hstack([X, Y])
+        csvFile.write(",".join(row.astype(str)) + os.linesep)
 
 #train the model
-def trainModel(name, numOutput=1):
+def trainModel(name, outputLen=1):
     print("TRAINING MODEL...")
 
-    #read data, slit and shuffle
-    data = []
+    #data = []
     #csvFileName = "train/" +name + ".csv"
     #with open(csvFileName, 'r') as csvFile:
     #    reader = csv.reader(csvFile)
     #    for row in reader:
     #        data.append(row)
+
+    #read data
+    data = []
     csvFileName = "train/" +name + ".csv"
     with open(csvFileName, 'r') as csvFile:
-        reader = f.read()
-        for row in reader:
+        for row in csvFile:
+            row = row.replace(os.linesep, '')
             data.append(row.split(","))
-
+    data = np.array(data)
+ 
+    #shuffle and split data
     np.random.shuffle(data)
-    X = data[:,:-numOutput]
-    Y = data[:,-numOutput:]
+    X = data[:,:-outputLen]
+    Y = data[:,-outputLen:]
+    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
     
     #train model
-    X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.33, random_state=42)
     scaler = preprocessing.StandardScaler()
     X_train = scaler.fit_transform(X_train)
     X_test = scaler.transform(X_test)
