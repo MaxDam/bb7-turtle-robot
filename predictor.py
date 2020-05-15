@@ -1,6 +1,10 @@
+#sudo apt-get update 
 #sudo apt-get install gfortran libatlas-base-dev libopenblas-dev liblapack-dev -y
-#sudo pip install scikit-learn
+#pip3 install scikit-learn --index-url https://piwheels.org/simple
 #pip install csv
+
+#sudo apt-get install libatlas-base-dev
+#pip install -U scikit-learn
 
 import numpy as np
 import cv2

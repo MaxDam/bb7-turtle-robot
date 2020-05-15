@@ -1,0 +1,147 @@
+
+> sudo raspi-config
+
+This menu has eight selections, as shown in the figure. 
+Which options you enable will depend on the types of devices you employ in yourRasPi system. 
+I recommend enabling the following options to match the demonstrations and procedures discussed in this book:
+
+Camera
+SSH
+SPI
+I2C
+Serial
+1-Wire
+
+> sudo reboot
+
+Updating and upgrading the Raspbiandistribution
+
+> sudo apt-get update
+
+Install pip, which is a Python package manager utility. 
+This utility is very similar to advancedpacking tool (apt), but uses a separate distribution repository. 
+Enter the following commands:
+
+> wget https://bootstrap.pypa.io/get-pip.py
+> sudo python3 get-pip.py
+
+Install the virtualenv and virtualenvwrapper utilities. 
+The virtualenv utility is used to create the virtual environment within Python 3. 
+The virtualenvwrapper utility creates the links betweenthe Python language and the 
+Python code to be executed within the environment. 
+
+Enter thefollowing command:
+
+> sudo pip install virtualenv virtualenvwrapper
+> sudo rm -rf ~/get-pip.py ~/.cache/pip
+
+A hidden file named .profile located in the home directory must be edited to include 
+some initialization data. 
+I recommend that you use the nano editor and append the data as shown here:
+
+> cd ~
+> sudo nano .profile
+
+The data to be appended follows the last line in theexisting file:
+
+# virtualenv and virtualenvwrapper 
+export WORKON_HOME=$HOME/.virtualenvs
+export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3
+source /usr/local/bin/virtualenvwrapper.sh
+
+Alternately, you may directly enter the initialization data at the command-line prompt 
+using the following commands:
+ 
+echo -e "\n# virtualenv and virtualenvwrapper" >>~/.profile
+echo "export WORKON_HOME=$HOME/.virtualenvs" >> ~/.profile
+echo "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3">> ~/.profile
+echo "source /usr/local/bin/virtualenvwrapper.sh" >>~/.profile
+
+The ~./profile file must now be sourced. 
+The source command is used to load functions contained in the named file into 
+the current shell forexecution.
+
+> source ~/.profile
+
+This step actually generates a virtual environment using the virtualenv and virtualenvwrapper 
+utilities previously installed in step 2. 
+You will needto provide a unique name for the environment. 
+The one used in this example is py3cv4_1. 
+If you plan ongenerating multiple environments, then a namingscheme 
+such as py3cv4_1, py3cv4_2, py3cv4_3, and so on might be used. 
+The name py3cv4_1 refers to the fact that the virtual environment uses Python 3 
+and it also contains the OpenCV 4 software package. 
+Additionally, it would be very desirable to document the reason for creating each 
+environment or you will quickly become confused. 
+Enter the following togenerate the py3cv4_1 Python virtual environment:
+
+> mkvirtualenv py3cv4_1 -p python3
+
+It takes about 40 seconds to create the virtualenvironment. 
+
+Figure1-15 shows the result of running prepended to the regular command-line prompt. 
+This indicates that a virtual environment is currently ineffect.
+
+You can easily shut down the py3cv4_1 virtualenvironment by simply closing 
+the terminal window.
+I recommend doing that.
+
+Open a new terminal window to verify that you canstart the py3cv4_1 virtual environment. 
+Enter the following command:
+
+>source ~/.profile
+>workon py3cv4_1
+
+The work on command is included in the virtualenvwrapper software package. 
+This command allows for the easy and quick startup of any Python virtual environment. 
+Figure1-16 showsthe result of the preceding commands.
+
+This figure appearing will confirm that you have a working virtualenvironment and are 
+ready to proceed with the next steps to create thedata model framework.
+
+Installing dependencies:
+
+The next demonstration requires a number of software packages to be installed in support of it. 
+Some packages are already pre-installed in the original downloaded Image, while 
+others must be explicitly installed.
+The following commands will install all the packages. 
+You will get an informational statement if the package is already installed; 
+otherwise, the full installation will happen. 
+These commands will take some time because the packages can be large and complex to install:
+
+pip install numpy
+pip install scipy
+pip install matplotlib
+pip install pandas
+sudo apt-get install libatlas-base-dev
+pip install -U scikit-learn
+
+# Check library versions
+# Python version
+import sys
+print('Python: {}'.format(sys.version))
+# scipy
+import scipy
+print('scipy: {}'.format(scipy.__version__))
+# numpy
+import numpy
+print('numpy: {}'.format(numpy.__version__))
+# matplotlib
+import matplotlib
+print('matplotlib: {}'.format(matplotlib.__version__))
+# pandas
+import pandas
+print('pandas: {}'.format(pandas.__version__))
+# scikit-learn
+import sklearn
+print('sklearn: {}'.format(sklearn.__version__))
+
+The versions you display will likely differ from the figures to some degree 
+because open source software is constantly being revised. 
+However, the packages should function in the same way as earlier versions unless
+some radical and unforeseen changes were made. 
+This is not normally done for consistency’s sake. 
+You will now be ready to tackle the ML demonstration once all the dependencies 
+are installed and operational.
+
+
