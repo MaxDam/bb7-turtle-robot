@@ -8,7 +8,7 @@
 
 import numpy as np
 import cv2
-#import csv
+import csv
 
 from sklearn import preprocessing
 from sklearn.ensemble import RandomForestRegressor
@@ -44,8 +44,8 @@ print(predict)
 
 
 #return image input histogram (Cumulative Distribution Function)
-def getInputHistogram(self):
-    hist, _ = np.histogram(self.inputImage.flatten(), self.inputNumber, [0,256])
+def getImageHistogram(inputImage, bucketsCount):
+    hist, _ = np.histogram(inputImage.flatten(), bucketsCount, [0,256])
     cdf = hist.cumsum()
     cdf_normalized = cdf * hist.max()/ cdf.max()
     #return hist
@@ -64,9 +64,9 @@ def writeDataToCsv(name, X, Y):
     #    writer.writerow(np.hstack([X, Y]))
 
     csvFileName = "train/" +name + ".csv"
-    data_file = open(csvFileName,"w")
-    for 
-    data_file.write(",".join(np.hstack([X, Y]).astype(str)))
+    with open(csvFileName, mode='a', newline='') as csvFile:
+        data = np.hstack([X, Y])
+        csvFile.write(",".join(row.astype(str)))
 
 #train the model
 def trainModel(name, numOutput=1):
@@ -74,11 +74,17 @@ def trainModel(name, numOutput=1):
 
     #read data, slit and shuffle
     data = []
+    #csvFileName = "train/" +name + ".csv"
+    #with open(csvFileName, 'r') as csvFile:
+    #    reader = csv.reader(csvFile)
+    #    for row in reader:
+    #        data.append(row)
     csvFileName = "train/" +name + ".csv"
     with open(csvFileName, 'r') as csvFile:
-        reader = csv.reader(csvFile)
+        reader = f.read()
         for row in reader:
-            data.append(row)
+            data.append(row.split(","))
+
     np.random.shuffle(data)
     X = data[:,:-numOutput]
     Y = data[:,-numOutput:]

@@ -1,3 +1,6 @@
+#sudo apt-get install libasound2-dev.
+#application alsamixer
+
 #pip3 install SpeechRecognition 
 #pip3 install PyAudio
 
