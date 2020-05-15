@@ -164,9 +164,9 @@ def detectBall(debug=False):
     #se ha trovato la palla la ritorna
     if len(contours) > 0:
         if(debug): 
-            print("ball found %s %s" % (radius, str(center)))
-            cv2.circle(frame, center, int(maxRadius), (0, 255, 255), 2)
-            cv2.circle(frame, center, 5, (0, 0, 255), -1)
+            print("ball found %s %s" % (radius, str(maxCenter)))
+            cv2.circle(frame, maxCenter, int(maxRadius), (0, 255, 255), 2)
+            cv2.circle(frame, maxCenter, 5, (0, 0, 255), -1)
         
         #torna il centro ed il raggio della palla individuata
         detected = (maxCenter, maxRadius)

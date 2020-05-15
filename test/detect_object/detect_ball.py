@@ -91,8 +91,8 @@ while True:
             maxCenter = center
 
     if len(contours) > 0:
-        cv2.circle(frame, center, int(maxRadius), (0, 255, 255), 2)
-        cv2.circle(frame, center, 5, (0, 0, 255), -1)
+        cv2.circle(frame, maxCenter, int(maxRadius), (0, 255, 255), 2)
+        cv2.circle(frame, maxCenter, 5, (0, 0, 255), -1)
     
     #view video to the screen
     cv2.imshow('Mask', mask)

@@ -26,9 +26,7 @@ cv2.setTrackbarPos('HMax', 'image', 20)
 cv2.setTrackbarPos('SMax', 'image', 255)
 cv2.setTrackbarPos('VMax', 'image', 255)
 
-# Initialize HSV min/max values
-hMin = sMin = vMin = hMax = sMax = vMax = 0
-phMin = psMin = pvMin = phMax = psMax = pvMax = 0
+MIN_RADIUS_THRWSHOLD = 10
 
 #import images
 filenames = [img for img in glob.glob("frames/*.jpg")]
@@ -37,7 +35,7 @@ filenames = [img for img in glob.glob("frames/*.jpg")]
 index = 0
 while True:
 
-    #Capture image
+    #open image from filenames
     image = cv2.imread(filenames[index], 1)
     index += 1
     if index >= len(filenames): index = 0
@@ -60,27 +58,43 @@ while True:
     mask = cv2.inRange(hsv, lower, upper)
     mask = cv2.erode(mask, None, iterations=2)
     mask = cv2.dilate(mask, None, iterations=2)
-    result = cv2.bitwise_and(image, image, mask=mask)
 
-    # Print if there is a change in HSV value
-    if((phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax) ):
-        print("((%d, %d, %d), (%d, %d, %d))" % (hMin , sMin , vMin, hMax, sMax , vMax))
-        phMin = hMin
-        psMin = sMin
-        pvMin = vMin
-        phMax = hMax
-        psMax = sMax
-        pvMax = vMax
+    # Print HSV value ranges
+    print("((%d, %d, %d), (%d, %d, %d))" % (hMin , sMin , vMin, hMax, sMax , vMax))
+
+    #trova i contorni
+    contours  = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
+    center = None
+    
+    #scorre i contorni trovati
+    for contour in contours:
+        #ottiene il cerchio ed il centro
+        ((x, y), radius) = cv2.minEnclosingCircle(contour)
+        M = cv2.moments(contour)
+        center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+            
+        #cerca la palla con il raggio maggiore
+        maxRadius = MIN_RADIUS_THRWSHOLD
+        maxCenter = (0,0)
+        if radius > maxRadius:
+            maxRadius = radius
+            maxCenter = center
+    
+    #se ha trovato la palla la disegna sull'immagine
+    if len(contours) > 0:
+        cv2.circle(image, maxCenter, int(maxRadius), (0, 255, 255), 2)
+        cv2.circle(image, maxCenter, 5, (0, 0, 255), -1)
 
     # Display result image
     cv2.imshow('original', image)
     cv2.imshow('mask', mask)
-    cv2.imshow('image', result)
 
+    #exit
     k = cv2.waitKey(1)
     if(k==ord("q")): 
         break
     
+    #sleep
     time.sleep(0.3)
 
 cv2.destroyAllWindows()
